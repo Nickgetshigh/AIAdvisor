@@ -34,7 +34,7 @@ def generate_3d_wordcloud_frames(words, positions, num_frames=30):
         )])
         fig.update_layout(scene=dict(aspectmode='cube'), showlegend=False)
         image_path = f"frame_{i}.png"
-        fig.write_image(image_path)
+        fig.write_image(image_path, engine="kaleido")
         frames.append(imageio.imread(image_path))
         os.remove(image_path)
     return frames
