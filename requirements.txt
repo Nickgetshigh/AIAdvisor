@@ -3,3 +3,4 @@ PyMuPDF
 plotly
 imageio
 matplotlib
+kaleido
