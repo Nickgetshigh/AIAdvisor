@@ -56,4 +56,5 @@ if uploaded_file is not None:
 
     # Create GIF
     gif_path = "3d_wordcloud.gif"
-    imageio.mimsave(gif_path, frames, fps=2
+    imageio.mimsave(gif_path, frames, fps=2)
+    st.image(gif_path)
