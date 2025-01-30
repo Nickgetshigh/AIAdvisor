@@ -2,4 +2,3 @@ streamlit
 PyMuPDF
 wordcloud
 matplotlib
-kaleido
