@@ -22,7 +22,7 @@ def generate_wordcloud(text):
     return "wordcloud.png"
 
 # Streamlit app
-st.title("PDF to Colorful Word Cloud Generator")
+st.title("PDF to Word Cloud Generator")
 
 # Upload PDF file
 uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
