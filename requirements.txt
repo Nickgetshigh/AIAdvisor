@@ -1,6 +1,5 @@
 streamlit
 PyMuPDF
-plotly
-imageio
+wordcloud
 matplotlib
 kaleido
