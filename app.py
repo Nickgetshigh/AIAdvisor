@@ -1,7 +1,10 @@
 import streamlit as st
 import fitz  # PyMuPDF
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import imageio
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+import os
 
 # Function to extract text from PDF
 def extract_text_from_pdf(pdf_file):
@@ -11,18 +14,33 @@ def extract_text_from_pdf(pdf_file):
         text += page.get_text()
     return text
 
-# Function to generate word cloud image
-def generate_wordcloud(text):
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
-    plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.tight_layout(pad=0)
-    plt.savefig("wordcloud.png", format="png")
-    return "wordcloud.png"
+# Function to create 3D word positions
+def generate_3d_word_positions(words, size=30):
+    np.random.seed(42)
+    positions = np.random.rand(len(words), 3)
+    return positions
+
+# Function to generate frames for 3D word cloud
+def generate_3d_wordcloud_frames(words, positions, num_frames=30):
+    frames = []
+    for i in range(num_frames):
+        fig = go.Figure(data=[go.Scatter3d(
+            x=positions[:,0],
+            y=positions[:,1],
+            z=positions[:,2],
+            mode='text',
+            text=words,
+            textfont=dict(size=12, color='black')
+        )])
+        fig.update_layout(scene=dict(aspectmode='cube'), showlegend=False)
+        image_path = f"frame_{i}.png"
+        fig.write_image(image_path)
+        frames.append(imageio.imread(image_path))
+        os.remove(image_path)
+    return frames
 
 # Streamlit app
-st.title("PDF to Word Cloud Generator")
+st.title("PDF to 3D Word Cloud GIF Generator")
 
 # Upload PDF file
 uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
@@ -31,7 +49,11 @@ if uploaded_file is not None:
     text = extract_text_from_pdf(uploaded_file)
     st.write("Extracted Text:")
     st.write(text)
+    
+    words = text.split()
+    positions = generate_3d_word_positions(words)
+    frames = generate_3d_wordcloud_frames(words, positions)
 
-    # Generate word cloud
-    wordcloud_image = generate_wordcloud(text)
-    st.image(wordcloud_image, use_column_width=True)
+    # Create GIF
+    gif_path = "3d_wordcloud.gif"
+    imageio.mimsave(gif_path, frames, fps=2
