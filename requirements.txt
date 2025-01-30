@@ -1,0 +1,4 @@
+streamlit
+PyMuPDF
+wordcloud
+matplotlib
