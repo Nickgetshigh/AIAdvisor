@@ -6,7 +6,7 @@ import base64
 import io
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="For My Love", page_icon="❤️", layout="centered")
+st.set_page_config(page_title="For You", page_icon="❤️", layout="centered")
 
 # --- CUSTOM CSS FOR THEME ---
 st.markdown("""
@@ -17,6 +17,7 @@ st.markdown("""
     h1 {
         color: #ff4d6d;
         text-align: center;
+        font-family: 'Georgia', serif;
     }
     .stButton>button {
         background-color: #ff4d6d;
@@ -24,6 +25,11 @@ st.markdown("""
         border-radius: 20px;
         border: none;
         padding: 10px 25px;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        background-color: #ff758f;
+        border: 1px solid white;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -36,49 +42,43 @@ def get_lottie(url):
     except:
         return None
 
-# Latest stable Lottie URL
 lottie_url = "https://lottie.host/8040409a-6756-4299-9759-33b68051a029/9f7l8fX7y9.json"
 lottie_hearts = get_lottie(lottie_url)
 
 # --- AUDIO FUNCTION ---
 def play_audio(text, lang):
     try:
-        tts = gTTS(text=text, lang=lang)
+        # Added a bit of 'slow' for a softer Hindi delivery
+        tts = gTTS(text=text, lang=lang, slow=False)
         fp = io.BytesIO()
         tts.write_to_fp(fp)
         fp.seek(0)
         audio_b64 = base64.b64encode(fp.read()).decode()
-        # Hidden autoplay audio tag
         audio_tag = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
         st.markdown(audio_tag, unsafe_allow_html=True)
     except Exception as e:
-        st.error("Audio could not be generated.")
+        pass
 
 # --- APP LOGIC ---
 if 'language' not in st.session_state:
     st.session_state.language = 'Chinese'
 
-# Display Animation
 if lottie_hearts:
     st_lottie(lottie_hearts, height=250, key="main_heart")
-else:
-    st.title("❤️") # Fallback if URL fails
 
-# Language Content
+# Content Management
 if st.session_state.language == 'Chinese':
-    main_text = "你会做我的情人吗？"
-    sub_text = "(Will you be my Valentine?)"
+    main_text = "你会跟我做爱吗？" # Chinese for the updated request
     lang_code = 'zh-cn'
     btn_label = "Translate to Hindi 🇮🇳"
 else:
-    main_text = "क्या तुम मेरी वैलेंटाइन बनोगी?"
-    sub_text = "(Will you be my Valentine?)"
+    # Hindi for the updated request
+    main_text = "क्या तुम मेरे साथ हमबिस्तर होगी?" 
     lang_code = 'hi'
     btn_label = "Translate to Chinese 🇨🇳"
 
 # Display Text
 st.markdown(f"<h1>{main_text}</h1>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; color: #ff758f;'>{sub_text}</p>", unsafe_allow_html=True)
 
 # Translation Button
 col1, col2, col3 = st.columns([1, 2, 1])
@@ -87,20 +87,19 @@ with col2:
         st.session_state.language = 'Hindi' if st.session_state.language == 'Chinese' else 'Chinese'
         st.rerun()
 
-# Play Audio automatically on load/change
+# Play Audio
 play_audio(main_text, lang_code)
 
-# Final Question Buttons
 st.write("---")
 c1, c2 = st.columns(2)
 
 with c1:
     if st.button("YES! 😍", use_container_width=True):
         st.balloons()
-        st.success("Yay! Best Valentine ever! ❤️")
-        st.confetti() # Only works on some streamlit versions, st.balloons is safer
+        # Celebration animation
+        celebrate = get_lottie("https://lottie.host/67702580-f00a-42fb-a7e8-e4b779a5e8c1/m8n8C0zE9Y.json")
+        st_lottie(celebrate, height=200)
 
 with c2:
-    # A little joke for the 'No' button
     if st.button("No 😢", use_container_width=True):
-        st.warning("Error: This button is broken. Try the other one! 😉")
+        st.warning("Try again! 😉")
