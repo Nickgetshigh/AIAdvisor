@@ -16,9 +16,9 @@ if 'direction_y' not in st.session_state: st.session_state.direction_y = 1
 st.markdown("""
 <style>
 .main {background: linear-gradient(135deg, #ff6b9d, #c44569, #ff9ff3);}
-body {overflow-x: hidden;}
 .heart-display {font-size: 80px; position: relative;}
 .game-zone {height: 400px; background: rgba(255,255,255,0.1);}
+.zone-btn {height: 80px; width: 100%;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -38,9 +38,6 @@ if st.session_state.game_state == 'start':
             st.session_state.direction_x = random.choice([-1, 1])
             st.session_state.direction_y = random.choice([-1, 1])
             st.rerun()
-    
-    with col2:
-        st.video("https://media.giphy.com/media/Jq6o5N6V2iF2I/giphy.gif")  # Animated heart demo
 
 elif st.session_state.game_state == 'playing':
     # Update timer
@@ -51,25 +48,23 @@ elif st.session_state.game_state == 'playing':
     st.session_state.heart_x += st.session_state.direction_x * 2
     st.session_state.heart_y += st.session_state.direction_y * 1.5
     
-    # Bounce off screen edges (0-100%)
+    # Bounce off screen edges
     if st.session_state.heart_x <= 0 or st.session_state.heart_x >= 95:
         st.session_state.direction_x *= -1
     if st.session_state.heart_y <= 0 or st.session_state.heart_y >= 90:
         st.session_state.direction_y *= -1
     
-    # Keep in bounds
     st.session_state.heart_x = max(0, min(95, st.session_state.heart_x))
     st.session_state.heart_y = max(0, min(90, st.session_state.heart_y))
     
-    # Header with timer
+    # Header
     col_t1, col_t2 = st.columns([2,1])
-    with col_t1: st.markdown(f"### 🏃‍♂️ **Heart Position: X:{int(st.session_state.heart_x)} Y:{int(st.session_state.heart_y)}**")
-    with col_t2: st.markdown(f"## ⏰ **{st.session_state.time_left:.1f}s** ⏰")
+    with col_t1: 
+        st.markdown(f"### 🏃‍♂️ **Heart at X:{int(st.session_state.heart_x)} Y:{int(st.session_state.heart_y)}**")
+    with col_t2: 
+        st.markdown(f"## ⏰ **{st.session_state.time_left:.1f}s** ⏰")
     
-    # FULL SCREEN GAME ZONE
-    st.markdown('<div class="game-zone">', unsafe_allow_html=True)
-    
-    # MOVING HEART DISPLAY (NON-CLICKABLE)
+    # MOVING HEART (NON-CLICKABLE)
     heart_style = f"""
     <div style="
         position: absolute; 
@@ -89,8 +84,8 @@ elif st.session_state.game_state == 'playing':
     """
     st.markdown(heart_style, unsafe_allow_html=True)
     
-    # CLICKABLE TARGET ZONES (5x5 grid)
-    st.markdown("### **Click the zones nearest the heart! 🎯**")
+    # CLICKABLE 5x5 TARGET ZONES (FIXED F-STRING)
+    st.markdown("### **Click nearest zones to catch it! 🎯**")
     for row in range(5):
         cols = st.columns(5)
         for col in range(5):
@@ -99,50 +94,46 @@ elif st.session_state.game_state == 'playing':
             distance = abs(zone_x - st.session_state.heart_x) + abs(zone_y - st.session_state.heart_y)
             
             with cols[col]:
-                if st.button(f"[{zone_x}-{zone_x+20}]
-[{zone_y}-{zone_y+20}]", key=f"zone_{row}_{col}"):
-                    if distance < 25:  # Close enough to heart
+                btn_text = f"Z{zone_x}-{zone_x+19} Y{zone_y}-{zone_y+19}"
+                if st.button(btn_text, key=f"zone_{row}_{col}_{int(time.time())}", help="Click here!"):
+                    if distance < 25:
                         st.session_state.game_state = 'won'
-                        st.success("🎉 **GOT THE HEART! Perfect timing!** 💕")
+                        st.success("🎉 **CAUGHT THE HEART! Perfect timing!** 💕")
                         st.balloons()
                         st.rerun()
                     else:
-                        st.error("💥 Too far! Keep chasing!")
+                        st.error("💥 Too far! Keep trying!")
                         st.rerun()
     
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Time up check
     if st.session_state.time_left <= 0:
         st.session_state.game_state = 'lost'
-        st.error("💔 **TIME UP! Heart got away!** 😭")
+        st.error("💔 **TIME UP! Heart escaped!** 😭")
         st.rerun()
 
 elif st.session_state.game_state == 'lost':
-    st.markdown("## 💥 **HEART ESCAPED! PENALTY DARES** 💥")
+    st.markdown("## 💥 **HEART ESCAPED! PENALTY TIME** 💥")
     
     dares = [
-        "💃 **Do 10 pushups** for chasing fitness! 💪",
-        "🎵 **Sing 'Perfect' by Ed Sheeran** (record it!) 🎤", 
-        "🍫 **Share chocolates** with someone special! 🍫",
-        "✍️ **Write 3 things you love** about someone ❤️",
-        "🌹 **Send flowers emoji** to 5 friends! 🌺"
+        "💃 **Dance like nobody's watching** (Send video!)",
+        "🍫 **Buy chocolates for your crush**", 
+        "📝 **Write a love poem** (screenshot!)",
+        "🎤 **Sing a love song** (voice note!)",
+        "🌹 **Gift a flower** (photo proof!)"
     ]
     
-    dare_choice = st.radio("Pick your Valentine redemption dare:", dares)
+    dare_choice = st.radio("Pick your Valentine dare:", dares)
     if st.button("✅ **I ACCEPT!**", use_container_width=True):
         st.session_state.game_state = 'dare_selected'
         st.balloons()
         st.rerun()
 
 elif st.session_state.game_state == 'dare_selected':
-    st.success("✅ **Dare assigned! Complete it to become heart-catching pro!** 💖")
+    st.success("✅ **Dare assigned! Complete it! 💖**")
 
-# ALWAYS SHOW RESTART
-st.markdown("---")
-if st.button("🔄 **NEW CHASE**", use_container_width=True, key="restart"):
+# RESTART BUTTON
+if st.button("🔄 **NEW GAME**", use_container_width=True):
     for key in list(st.session_state.keys()):
-        if key not in ['game_state']:
+        if key != 'game_state':
             del st.session_state[key]
     st.session_state.game_state = 'start'
     st.rerun()
