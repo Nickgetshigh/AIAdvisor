@@ -174,7 +174,7 @@ def get_best_move(game: TicTacToe) -> Optional[Tuple[int, int]]:
     return best_move
 
 # Valentine messages
-WELCOME_MESSAGE = "💕 **Think you can beat me?** 💕
+WELCOME_MESSAGE = "💕 **Think you can beat me?** 💕"
 
 If you lose, the stakes are *high*... Play as **X**, I'll be **O**. Make your move!"
 TOASTS = [
