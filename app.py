@@ -1,190 +1,156 @@
 import streamlit as st
-import time
 import random
+import time
+from streamlit_confetti import confetti
 
-st.set_page_config(page_title="🎮 Nikku's Tic Tac Toe Trap 🎮", page_icon="🧡", layout="wide")
+# --- PAGE CONFIG ---
+st.set_page_config(page_title="The Valentine's Challenge", page_icon="❤️", layout="centered")
 
-# PROPER SESSION STATE INITIALIZATION
-if 'board' not in st.session_state:
-    st.session_state.board = [''] * 9
-if 'current_player' not in st.session_state:
-    st.session_state.current_player = 'X'
-if 'winner' not in st.session_state:
-    st.session_state.winner = None
-if 'game_over' not in st.session_state:
-    st.session_state.game_over = False
-if 'nikku_wins' not in st.session_state:
-    st.session_state.nikku_wins = 0
-if 'game_state' not in st.session_state:
-    st.session_state.game_state = 'playing'
-
-# DESI TIC TAC TOE CSS
+# --- CUSTOM THEME & STYLING ---
 st.markdown("""
-<style>
-.main { max-width: 450px !important; margin: 0 auto !important; padding: 1.5rem !important;
-    background: rgba(255,255,255,0.97) !important; border-radius: 30px !important;
-    box-shadow: 0 25px 70px rgba(255,107,53,0.5) !important; border: 4px solid rgba(255,204,2,0.4) !important;
-    background: linear-gradient(135deg, #ff6b35, #f7931e, #ffcc02, #ff6b35) !important; }
-header, footer { display: none !important; }
-.stButton > button { width: 100% !important; height: 75px !important; 
-    background: linear-gradient(45deg, #ff6b35, #f7931e, #ffcc02) !important; color: white !important; 
-    font-size: 22px !important; font-weight: bold !important; border-radius: 20px !important; 
-    border: 3px solid rgba(255,255,255,0.3) !important; margin: 12px 0 !important; 
-    box-shadow: 0 12px 35px rgba(255,107,53,0.5) !important; }
-.ttt-board { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; 
-    background: linear-gradient(45deg, rgba(255,204,2,0.2), rgba(255,107,53,0.1)); 
-    padding: 25px; border-radius: 25px; border: 4px solid #ffcc02; margin: 25px 0;
-    box-shadow: inset 0 0 40px rgba(255,204,2,0.3); }
-.ttt-cell { height: 90px !important; font-size: 48px !important; font-weight: bold !important;
-    background: rgba(255,255,255,0.9) !important; color: #2c3e50 !important;
-    border: 3px solid #ffcc02 !important; border-radius: 18px !important; cursor: pointer !important;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important; }
-.ttt-cell:hover { transform: scale(1.05) !important; box-shadow: 0 10px 30px rgba(255,204,2,0.4) !important; }
-.nikku-victory { background: linear-gradient(135deg, #ff6b35, #f7931e) !important; 
-    color: white !important; border: 5px solid #ffcc02 !important; padding: 30px; 
-    border-radius: 25px; margin: 20px 0; text-align: center; }
-.nikku-name-glow { color: #ffcc02 !important; font-size: 38px !important; font-weight: bold !important; 
-    text-shadow: 0 0 25px #ffcc02 !important; }
-.stats-bar { background: linear-gradient(90deg, #ff6b35, #f7931e, #ffcc02); 
-    color: white; padding: 20px; border-radius: 20px; text-align: center; font-size: 24px;
-    font-weight: bold; margin: 20px 0; }
-.penalty-card { background: linear-gradient(135deg, rgba(255,107,53,0.95), rgba(247,147,30,0.95)); 
-    color: white; padding: 45px; border-radius: 35px; text-align: center; margin: 30px 0;
-    box-shadow: 0 25px 70px rgba(255,107,53,0.7); border: 6px solid #ffcc02; }
-</style>
-""", unsafe_allow_html=True)
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400&display=swap');
+    
+    .main { background-color: #FFF5F5; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; color: #8B0000; text-align: center; }
+    p { font-family: 'Poppins', sans-serif; color: #4A4A4A; text-align: center; }
+    
+    /* Grid Styling */
+    .stButton > button {
+        width: 100%;
+        height: 100px;
+        font-size: 40px !important;
+        border-radius: 15px;
+        border: 2px solid #FFC0CB;
+        background-color: white;
+        color: #8B0000;
+        transition: all 0.3s ease;
+    }
+    .stButton > button:hover {
+        border-color: #FFD700;
+        background-color: #FFF0F0;
+        transform: scale(1.02);
+    }
+    /* Fixed Container for the Board */
+    div[data-testid="stVerticalBlock"] > div:has(div.stButton) {
+        gap: 0.5rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
+# --- MINIMAX LOGIC ---
 def check_winner(board):
-    wins = [(0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
-    for a, b, c in wins:
-        if board[a] == board[b] == board[c] != '':
+    lines = [(0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
+    for a, b, c in lines:
+        if board[a] == board[b] == board[c] and board[a] is not None:
             return board[a]
-    return None if '' in board else 'DRAW'
+    if None not in board: return "Draw"
+    return None
 
-def computer_move():
-    empty = [i for i, cell in enumerate(st.session_state.board) if cell == '']
-    if not empty:
-        return None
-    
-    # UNBEATABLE AI STRATEGY
-    if 4 in empty:  # Center first
-        return 4
-    
-    # Block wins / take wins
-    wins = [(0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
-    for a, b, c in wins:
-        if st.session_state.board[a] == st.session_state.board[b] == 'X' and st.session_state.board[c] == '':
-            return c
-        if st.session_state.board[a] == st.session_state.board[c] == 'X' and st.session_state.board[b] == '':
-            return b
-        if st.session_state.board[b] == st.session_state.board[c] == 'X' and st.session_state.board[a] == '':
-            return a
-    
-    # Corners
-    corners = [0, 2, 6, 8]
-    for corner in corners:
-        if corner in empty:
-            return corner
-    
-    return random.choice(empty)
+def minimax(board, depth, is_maximizing):
+    res = check_winner(board)
+    if res == "O": return 10 - depth
+    if res == "X": return depth - 10
+    if res == "Draw": return 0
 
-def reset_game():
-    st.session_state.board = [''] * 9
-    st.session_state.current_player = 'X'
-    st.session_state.winner = None
+    if is_maximizing:
+        best_score = -float('inf')
+        for i in range(9):
+            if board[i] is None:
+                board[i] = "O"
+                score = minimax(board, depth + 1, False)
+                board[i] = None
+                best_score = max(score, best_score)
+        return best_score
+    else:
+        best_score = float('inf')
+        for i in range(9):
+            if board[i] is None:
+                board[i] = "X"
+                score = minimax(board, depth + 1, True)
+                board[i] = None
+                best_score = min(score, best_score)
+        return best_score
+
+def get_best_move(board):
+    best_score = -float('inf')
+    move = None
+    for i in range(9):
+        if board[i] is None:
+            board[i] = "O"
+            score = minimax(board, 0, False)
+            board[i] = None
+            if score > best_score:
+                best_score = score
+                move = i
+    return move
+
+# --- GAME STATE ---
+if 'board' not in st.session_state:
+    st.session_state.board = [None] * 9
     st.session_state.game_over = False
+    st.session_state.status = "Think you can beat me? If you lose, the stakes are high..."
 
-# MAIN UI
-st.markdown("## 🎮 **NIKKU vs UNBEATABLE AI** 🎮")
-st.markdown("<h3 style='color: #ff6b35; text-align: center;'>❌ **You (X)** vs 🟠 **Computer (O)**</h3>", unsafe_allow_html=True)
+# --- UI COMPONENTS ---
+def reset_game():
+    st.session_state.board = [None] * 9
+    st.session_state.game_over = False
+    st.session_state.status = "Think you can beat me? If you lose, the stakes are high..."
 
-st.markdown(f"""
-<div class="stats-bar">
-    🏆 **NIKKU WINS: {st.session_state.nikku_wins}** | 
-    📱 **YOUR TURN: {'✅ YES' if st.session_state.current_player == 'X' else '⏳ NO'}**
-</div>
-""", unsafe_allow_html=True)
+# --- HEADER ---
+st.title("🌹 The Valentine's Stakes")
+st.write(st.session_state.status)
 
-# TIC TAC TOE BOARD
-st.markdown('<div class="ttt-board">', unsafe_allow_html=True)
-cols = st.columns(3)
-for i in range(3):
-    for j in range(3):
-        idx = i * 3 + j
-        
-        with cols[j]:
-            if st.button(st.session_state.board[idx], key=f"cell_{idx}"):
-                if (st.session_state.board[idx] == '' and 
-                    st.session_state.current_player == 'X' and 
-                    not st.session_state.game_over):
-                    
-                    st.session_state.board[idx] = 'X'
-                    st.session_state.current_player = 'O'
-                    
-                    # Check player win (RARE!)
-                    st.session_state.winner = check_winner(st.session_state.board)
-                    if st.session_state.winner == 'X':
-                        st.session_state.game_over = True
-                        st.session_state.nikku_wins += 1  # Nikku still wins!
-                        st.balloons()
-                        st.markdown("""
-                        <div class="nikku-victory">
-                            <h2>🎉 **YOU WON THE GAME!** 🎉</h2>
-                            <h1 class="nikku-name-glow">**But NIKKU still wins the prize!** 😎</h1>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        st.rerun()
-                    
-                    # COMPUTER'S PERFECT TURN
-                    if not st.session_state.game_over:
-                        time.sleep(0.8)  # Dramatic pause
-                        comp_move = computer_move()
-                        if comp_move is not None:
-                            st.session_state.board[comp_move] = 'O'
-                            st.session_state.current_player = 'X'
-                            
-                            st.session_state.winner = check_winner(st.session_state.board)
-                            if st.session_state.winner == 'O':
-                                st.session_state.game_over = True
-                                st.session_state.nikku_wins += 1
-                                st.snow()
-                                st.markdown("""
-                                <div class="nikku-victory">
-                                    <h2>🤖 **COMPUTER WINS!** 🤖</h2>
-                                    <h1 class="nikku-name-glow">**NIKKU GETS KURTA/HOODIE!** 🎁</h1>
-                                </div>
-                                """, unsafe_allow_html=True)
-                                st.rerun()
-                            elif st.session_state.winner == 'DRAW':
-                                st.session_state.game_over = True
-                                st.warning("🤝 **DRAW!** Nikku still wins!")
-                                st.rerun()
+# --- THE GAME BOARD ---
+@st.fragment
+def render_board():
+    cols = st.columns(3)
+    for i in range(9):
+        with cols[i % 3]:
+            # Label logic: Show X, O or empty string
+            label = st.session_state.board[i] if st.session_state.board[i] else " "
+            
+            if st.button(label, key=f"btn_{i}", disabled=st.session_state.game_over or st.session_state.board[i] is not None):
+                # Player Move
+                st.session_state.board[i] = "X"
+                
+                # Check if Player won (impossible against this AI, but for logic sake)
+                if check_winner(st.session_state.board) is None:
+                    # AI Move
+                    with st.spinner("Thinking..."):
+                        time.sleep(0.2) # Artificial "Quick Think"
+                        ai_move = get_best_move(st.session_state.board)
+                        if ai_move is not None:
+                            st.session_state.board[ai_move] = "O"
+                
+                # Update Status
+                result = check_winner(st.session_state.board)
+                if result:
+                    st.session_state.game_over = True
+                    if result == "O":
+                        st.session_state.status = "LOSE"
+                    elif result == "Draw":
+                        st.session_state.status = "DRAW"
+                else:
+                    taunts = ["Nice try!", "Are you sure about that?", "Calculated.", "Hmm... interesting."]
+                    st.session_state.status = random.choice(taunts)
+                st.rerun()
 
-st.markdown('</div>', unsafe_allow_html=True)
+render_board()
 
-# CONTROLS
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("🔄 **NEW GAME** 🔄"):
+# --- CONCLUSION LOGIC ---
+if st.session_state.game_over:
+    st.divider()
+    if st.session_state.status == "LOSE":
+        confetti()
+        st.error("### Victory is mine! ❤️")
+        st.markdown("""
+            **Now, for your penalty:** You must wear your absolute best dress for our Valentine's date  
+            and surprise me with a wonderful gift. **No excuses!**
+        """)
+    elif st.session_state.status == "DRAW":
+        st.warning("### A Draw? I'll let you off easy... this time.")
+    
+    if st.button("Rematch? (Double or Nothing)"):
         reset_game()
         st.rerun()
-
-# ALWAYS VISIBLE PENALTY
-st.markdown("""
-<div class="penalty-card">
-    <h3>⚖️ **LAW OF TIC TAC TOE LOVE** ⚖️</h3>
-    <div class="nikku-name-glow">**NIKKU**</div>
-    <div style='font-size: 26px; margin: 20px 0; color: #ffcc02;'>**WINS EVERY TIME!** 🏆</div>
-    <div style='font-size: 22px; background: rgba(255,255,255,0.25); padding: 25px; border-radius: 20px;'>
-        🎁 **You owe Nikku: NEW KURTA or HOODIE** 🎁<br>
-        📸 **Screenshot + shopping proof = LOVE WIN!** 📸
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div style='text-align: center; margin-top: 30px; color: white; font-size: 18px; 
-    background: rgba(255,107,53,0.3); padding: 20px; border-radius: 20px;'>
-    💕 **Rigged with Pure Desi Love for Nikku** 💕 | Valentine's 2026
-</div>
-""", unsafe_allow_html=True)
