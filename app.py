@@ -6,45 +6,36 @@ import base64
 import io
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="For My Girl", page_icon="💖", layout="centered")
+st.set_page_config(page_title="For My Girl", page_icon="❤️", layout="centered")
 
-# --- CSS FOR THEME ---
+# --- STYLE ---
 st.markdown("""
     <style>
-    .stApp {
-        background-color: #fceef5;
-    }
-    h1 {
-        color: #d63384;
-        text-align: center;
-        font-family: 'Dancing Script', cursive;
-        font-size: 3rem !important;
-    }
-    .stButton>button {
-        background-color: #d63384;
-        color: white;
-        border-radius: 30px;
-        border: none;
-        font-weight: bold;
-    }
+    .stApp { background-color: #fff0f3; }
+    h1 { color: #ff4d6d; text-align: center; font-family: 'Georgia', serif; font-size: 2.5rem; }
+    .stSelectbox label { color: #ff4d6d; font-weight: bold; }
+    .stButton>button { background-color: #ff4d6d; color: white; border-radius: 25px; width: 100%; border: none; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- LOADING ASSETS ---
+# --- CRASH-PROOF LOTTIE FUNCTION ---
 def get_lottie(url):
     try:
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=3)
         return r.json() if r.status_code == 200 else None
     except:
         return None
 
-# Soft romantic heart animation
-lottie_hearts = get_lottie("https://lottie.host/8040409a-6756-4299-9759-33b68051a029/9f7l8fX7y9.json")
+def show_lottie(url, height=250, key=None):
+    data = get_lottie(url)
+    if data:
+        st_lottie(data, height=height, key=key)
+    else:
+        st.write("❤️") # Fallback heart icon
 
 # --- AUDIO FUNCTION ---
 def play_audio(text, lang):
     try:
-        # 'slow=True' makes the voice sound a bit more deliberate/soft
         tts = gTTS(text=text, lang=lang, slow=True)
         fp = io.BytesIO()
         tts.write_to_fp(fp)
@@ -55,50 +46,61 @@ def play_audio(text, lang):
     except:
         pass
 
-# --- SESSION STATE ---
-if 'language' not in st.session_state:
-    st.session_state.language = 'Chinese'
+# --- CONTENT DATABASE ---
+languages = {
+    "Sanskrit 🕉️": {
+        "text": "प्रिये, किं भवती मां दंष्टुं इच्छति?", 
+        "code": "hi", # Using Hindi voice for Sanskrit phonetics
+        "note": "(Priye, kim bhavati mam damstum icchati?)"
+    },
+    "Hindi 🇮🇳": {
+        "text": "बेबी, क्या तुम मुझे काटना चाहोगी?", 
+        "code": "hi",
+        "note": ""
+    },
+    "German 🇩🇪": {
+        "text": "Baby, willst du mich beißen?", 
+        "code": "de",
+        "note": ""
+    },
+    "Spanish 🇪🇸": {
+        "text": "Bebé, ¿quieres morderme?", 
+        "code": "es",
+        "note": ""
+    },
+    "Turkish 🇹🇷": {
+        "text": "Bebeğim, beni ısırmak ister misin?", 
+        "code": "tr",
+        "note": ""
+    }
+}
 
-# --- DISPLAY ---
-if lottie_hearts:
-    st_lottie(lottie_hearts, height=300, key="romance")
+# --- APP LAYOUT ---
+show_lottie("https://lottie.host/8040409a-6756-4299-9759-33b68051a029/9f7l8fX7y9.json", key="main")
 
-# Question Logic
-if st.session_state.language == 'Chinese':
-    # "Babe, do you want to bite me?" in Chinese
-    main_text = "宝贝，你想咬我吗？" 
-    lang_code = 'zh-cn'
-    btn_label = "Translate to Hindi 🇮🇳"
-else:
-    # "Babe, do you want to bite me?" in Hindi
-    main_text = "बेबी, क्या तुम मुझे काटना चाहती हो?" 
-    lang_code = 'hi'
-    btn_label = "Translate to Chinese 🇨🇳"
+# Language Selection
+selected_lang = st.selectbox("Choose a language for the message:", list(languages.keys()))
 
-# Display the question
-st.markdown(f"<h1>{main_text}</h1>", unsafe_allow_html=True)
+content = languages[selected_lang]
 
-# Audio Autoplay
-play_audio(main_text, lang_code)
+# Display Text
+st.markdown(f"<h1>{content['text']}</h1>", unsafe_allow_html=True)
+if content['note']:
+    st.markdown(f"<p style='text-align:center; color:#ff758f;'>{content['note']}</p>", unsafe_allow_html=True)
 
-# Language Toggle
-col1, col2, col3 = st.columns([1, 1, 1])
-with col2:
-    if st.button(btn_label):
-        st.session_state.language = 'Hindi' if st.session_state.language == 'Chinese' else 'Chinese'
-        st.rerun()
+# Autoplay Voice
+play_audio(content['text'], content['code'])
 
 st.write("---")
 
-# Buttons
+# Choice Buttons
 c1, c2 = st.columns(2)
 with c1:
-    if st.button("YES! 🦷❤️", use_container_width=True):
+    if st.button("YES! 😍"):
         st.balloons()
-        st.markdown("<h2 style='text-align:center;'>Ouch! But I love it. 😘</h2>", unsafe_allow_html=True)
-        celebrate = get_lottie("https://lottie.host/67702580-f00a-42fb-a7e8-e4b779a5e8c1/m8n8C0zE9Y.json")
-        st_lottie(celebrate, height=200)
+        st.success("I'm all yours! 😘")
+        show_lottie("https://lottie.host/67702580-f00a-42fb-a7e8-e4b779a5e8c1/m8n8C0zE9Y.json", height=150, key="celeb")
 
 with c2:
-    if st.button("No 🥺", use_container_width=True):
-        st.write("Why not? I'm delicious! 🍫")
+    if st.button("No 🥺"):
+        st.warning("Error: 'No' is currently out of stock. Try 'YES'!")
