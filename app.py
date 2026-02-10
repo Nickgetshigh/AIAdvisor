@@ -34,8 +34,9 @@ st.markdown("""
         border: 1px solid white;
         text-align: center;
         color: white;
-        font-size: 20px;
+        font-size: 18px;
         margin-bottom: 20px;
+        font-weight: bold;
     }
     hr { border: 1px solid #ffffff; }
     </style>
@@ -66,19 +67,40 @@ if lottie_main:
 
 st.markdown("<h2 style='text-align: center; color: white;'>Press a button to hear me...</h2>", unsafe_allow_html=True)
 
-# --- LANGUAGE DATA ---
+# --- UPDATED LANGUAGE DATA ---
 msg_data = {
-    "Sanskrit 🕉️": {"txt": "प्रिये, किं भवती मां खादितुं, दंष्टुं, आलिङ्गितुं, मैथुनं कर्तुं, लेढुं च इच्छति? मम वैलेंटाइन भव।", "code": "hi"},
-    "Hindi 🇮🇳": {"txt": "बेबी गर्ल, क्या तुम मुझे खाना, काटना, गले लगाना, मेरे साथ हमबिस्तर होना और चाटना चाहती हो? मेरी वैलेंटाइन बन जाओ।", "code": "hi"},
-    "Telugu 🇮🇳": {"txt": "బేబీ గర్ల్, నువ్వు నన్ను తినాలనుకుంటున్నావా, కరవాలనుకుంటున్నావా, కౌగిలించుకోవాలనుకుంటున్నావా, నాతో కలవాలనుకుంటున్నావా, నాకాలనుకుంటున్నావా? నా వాలెంటైన్ అవుతావా?", "code": "te"},
-    "German 🇩🇪": {"txt": "Bbygirl, willst du mich essen, mich beißen, mich umarmen, mich ficken, mich lecken? Und sei mein Valentin.", "code": "de"},
-    "Spanish 🇪🇸": {"txt": "Bbygirl, ¿quieres comerme, morderme, abrazarme, follarme, lamerme? Y sé mi Valentín.", "code": "es"},
-    "Turkish 🇹🇷": {"txt": "Bbygirl, beni yemek mi, ısırmak mı, sarılmak mı, sikmek mi, yalamak mı istiyorsun? Ve sevgilim ol.", "code": "tr"},
-    "French 🇫🇷": {"txt": "Bbygirl, tu veux me manger, me mordre, me câliner, me baiser, me lécher ? Et sois ma valentine.", "code": "fr"},
-    "Korean 🇰🇷": {"txt": "Bbygirl, 나를 먹고 싶니, 깨물고 싶니, 안고 싶니, 나랑 섹스하고 싶니, 핥고 싶니? 그리고 나의 발렌타인이 되어줘.", "code": "ko"},
-    "English 🇬🇧": {"txt": "Bbygirl do you wanna eat me bite me hug me fuck me lick me? And be my valentine.", "code": "en"},
-    "Chinese 🇨🇳": {"txt": "Bbygirl, 你想吃我，咬我，抱我，跟我做爱，舔我吗？做我的情人吧。", "code": "zh-cn"},
-    "Italian 🇮🇹": {"txt": "Bbygirl, vuoi mangiarmi, mordermi, abbracciarmi, scoparmi, leccarmi? E sii il mio Valentino.", "code": "it"}
+    "English 🇬🇧": {
+        "txt": "So you want me do you need me wanna fuck me come bby to me right now now now right now now now. Bbygirl I will take you up and down up and down round and round.", 
+        "code": "en"
+    },
+    "Telugu 🇮🇳": {
+        "txt": "కాబట్టి మీకు నేను కావాలి, మీకు నా అవసరం ఉందా, నాతో కలవాలనుకుంటున్నారా, ఇప్పుడే నా దగ్గరకు రండి. బేబీ గర్ల్, నేను నిన్ను పైకి కిందకి, చుట్టూ తిప్పుతాను.", 
+        "code": "te"
+    },
+    "Hindi 🇮🇳": {
+        "txt": "तो तुम मुझे चाहती हो, क्या तुम्हें मेरी ज़रूरत है, क्या तुम मेरे साथ हमबिस्तर होना चाहती हो, अभी मेरे पास आओ। बेबी गर्ल, मैं तुम्हें ऊपर-नीचे और गोल-गोल घुमाऊंगा।", 
+        "code": "hi"
+    },
+    "Spanish 🇪🇸": {
+        "txt": "Así que me quieres, ¿me necesitas, quieres follarme? ven a mí ahora mismo. Bbygirl, te llevaré de arriba abajo y daremos vueltas.", 
+        "code": "es"
+    },
+    "French 🇫🇷": {
+        "txt": "Alors tu me veux, tu as besoin de moi, tu veux me baiser ? viens à moi tout de suite. Bbygirl, je t'emmènerai de haut en bas et ferai le tour.", 
+        "code": "fr"
+    },
+    "German 🇩🇪": {
+        "txt": "Du willst mich also, brauchst du mich, willst du mich ficken? komm jetzt sofort zu mir. Bbygirl, ich werde dich auf und ab führen, rundherum.", 
+        "code": "de"
+    },
+    "Italian 🇮🇹": {
+        "txt": "Quindi mi vuoi, hai bisogno di me, vuoi scoparmi? vieni da me proprio ora. Bbygirl, ti porterò su e giù e faremo il giro.", 
+        "code": "it"
+    },
+    "Korean 🇰🇷": {
+        "txt": "그래서 넌 나를 원해, 내가 필요해, 나랑 섹스하고 싶어? 지금 당장 내게로 와. Bbygirl, 널 위아래로, 빙글빙글 데려갈게.", 
+        "code": "ko"
+    }
 }
 
 # --- BUTTON GRID ---
@@ -86,9 +108,9 @@ cols = st.columns(2)
 for i, (name, info) in enumerate(msg_data.items()):
     with cols[i % 2]:
         if st.button(name):
-            # Display text on screen
+            # Show the text on screen
             st.markdown(f'<div class="message-box">{info["txt"]}</div>', unsafe_allow_html=True)
-            # Play audio
+            # Play the audio
             play_audio(info['txt'], info['code'])
 
 st.markdown("<br><hr>", unsafe_allow_html=True)
