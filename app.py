@@ -14,7 +14,7 @@ COLORS = {
     'light_bg': '#2d1b2d'
 }
 
-# Custom CSS for romantic theme
+# Custom CSS for romantic theme - ALL STRINGS PROPERLY TERMINATED
 ST_CSS = f"""
 <style>
     .main {{
@@ -71,12 +71,12 @@ ST_CSS = f"""
 
 class TicTacToe:
     def __init__(self):
-        self.board = [['' for _ in range(3)] for _ in range(3)]
-        self.current_player = 'X'  # User starts
-        self.game_over = False
-        self.winner = None
+        self.board: List[List[str]] = [['' for _ in range(3)] for _ in range(3)]
+        self.current_player: str = 'X'  # User starts
+        self.game_over: bool = False
+        self.winner: Optional[str] = None
         
-    def reset(self):
+    def reset(self) -> None:
         self.__init__()
     
     def make_move(self, row: int, col: int, player: str) -> bool:
@@ -84,7 +84,10 @@ class TicTacToe:
         if 0 <= row < 3 and 0 <= col < 3 and self.board[row][col] == '' and not self.game_over:
             self.board[row][col] = player
             self.current_player = 'O' if player == 'X' else 'X'
-            self.game_over = bool(self.check_winner())
+            winner = self.check_winner()
+            self.game_over = bool(winner)
+            if winner:
+                self.winner = winner
             return True
         return False
     
@@ -112,32 +115,36 @@ class TicTacToe:
         
         return None
 
-def minimax(board: List[List[str]], is_maximizing: bool, game: TicTacToe) -> int:
-    """Minimax algorithm - corrected to avoid deep recursion issues"""
+    def get_empty_positions(self) -> List[Tuple[int, int]]:
+        """Get all empty positions on board"""
+        return [(i, j) for i in range(3) for j in range(3) if self.board[i][j] == '']
+
+def minimax(board: List[List[str]], is_maximizing: bool) -> int:
+    """Simplified minimax - modifies board in-place and undoes moves"""
+    game = TicTacToe()
+    game.board = board
     winner = game.check_winner()
     
     if winner == 'O':  # AI wins
-        return 10 - len([cell for row in board for cell in row if cell != ''])
+        return 10
     elif winner == 'X':  # User wins
-        return -10 + len([cell for row in board for cell in row if cell != ''])
+        return -10
     elif winner == 'draw':
         return 0
     
     if is_maximizing:  # AI's turn (O)
         max_eval = -float('inf')
-        empty_positions = [(i, j) for i in range(3) for j in range(3) if board[i][j] == '']
-        for row, col in empty_positions:
+        for row, col in game.get_empty_positions():
             board[row][col] = 'O'
-            eval_score = minimax(board, False, game)
+            eval_score = minimax(board, False)
             board[row][col] = ''  # Undo move
             max_eval = max(max_eval, eval_score)
         return max_eval
     else:  # User's turn (X)
         min_eval = float('inf')
-        empty_positions = [(i, j) for i in range(3) for j in range(3) if board[i][j] == '']
-        for row, col in empty_positions:
+        for row, col in game.get_empty_positions():
             board[row][col] = 'X'
-            eval_score = minimax(board, True, game)
+            eval_score = minimax(board, True)
             board[row][col] = ''  # Undo move
             min_eval = min(min_eval, eval_score)
         return min_eval
@@ -146,14 +153,13 @@ def get_best_move(game: TicTacToe) -> Optional[Tuple[int, int]]:
     """Find the best move for AI using minimax"""
     best_score = -float('inf')
     best_move = None
-    game_copy = copy.deepcopy(game)
     
-    empty_positions = [(i, j) for i in range(3) for j in range(3) if game.board[i][j] == '']
-    for row, col in empty_positions:
-        # Simulate move
-        game_copy.board[row][col] = 'O'
-        move_score = minimax(game_copy.board, False, game_copy)
-        game_copy.board[row][col] = ''  # Undo
+    for row, col in game.get_empty_positions():
+        # Make move
+        game.board[row][col] = 'O'
+        move_score = minimax(game.board, False)
+        # Undo move
+        game.board[row][col] = ''
         
         if move_score > best_score:
             best_score = move_score
@@ -161,26 +167,26 @@ def get_best_move(game: TicTacToe) -> Optional[Tuple[int, int]]:
     
     return best_move
 
-# Valentine messages
-WELCOME_MESSAGE = "💕 **Think you can beat me?** 💕
+# Valentine messages - ALL PROPERLY TERMINATED WITH TRIPLE QUOTES
+WELCOME_MESSAGE = """💕 **Think you can beat me?** 💕
 
-If you lose, the stakes are *high*... Play as **X**, I'll be **O**. Make your move!"
+If you lose, the stakes are *high*... Play as **X**, I'll be **O**. Make your move!"""
+
 TOASTS = [
     "Nice try, sweetheart! 😘",
-    "Are you sure about that move? 🤔",
+    "Are you sure about that move? 🤔", 
     "You're making this too easy! 💋",
     "Not bad... but I'm still winning! 😉",
     "Keep fighting, I love the challenge! 🔥"
 ]
-PENALTY_MESSAGE = """
-# 🎉 **VICTORY IS MINE! ❤️** 🎉
+
+PENALTY_MESSAGE = """# 🎉 **VICTORY IS MINE! ❤️** 🎉
 
 **Now, for your penalty:**  
 You must wear your *absolute best dress* for our Valentine's date  
 and surprise me with a **wonderful gift**.  
 
-**No excuses!** 💃✨
-"""
+**No excuses!** 💃✨"""
 
 def main():
     st.set_page_config(
@@ -191,25 +197,28 @@ def main():
     
     st.markdown(ST_CSS, unsafe_allow_html=True)
     
-    # Initialize session state properly
-    if 'initialized' not in st.session_state:
-        st.session_state.game = TicTacToe()
-        st.session_state.screen = 'welcome'
-        st.session_state.toast = ""
-        st.session_state.initialized = True
+    # Initialize session state - ALL KEYS PROPERLY INITIALIZED
+    for key in ['game', 'screen', 'toast', 'winner']:
+        if key not in st.session_state:
+            if key == 'game':
+                st.session_state[key] = TicTacToe()
+            elif key == 'screen':
+                st.session_state[key] = 'welcome'
+            else:
+                st.session_state[key] = ""
     
     game = st.session_state.game
     
     # Main layout
     if st.session_state.screen == 'welcome':
-        welcome_screen(game)
+        welcome_screen()
     elif st.session_state.screen == 'playing':
         game_screen(game)
     elif st.session_state.screen == 'game_over':
         game_over_screen(game)
 
-@st.cache_data
-def welcome_screen(_game):
+def welcome_screen():
+    """Welcome screen with proper string termination"""
     st.markdown("""
     <div style='text-align: center; padding: 3rem 0;'>
         <h1 style='font-size: 3.5rem; margin-bottom: 1rem;'>💕 TIC-TAC-TOE CHALLENGE 💕</h1>
@@ -228,18 +237,19 @@ def welcome_screen(_game):
             st.rerun()
 
 def game_screen(game: TicTacToe):
+    """Main game screen"""
     # Toast message
     if st.session_state.toast:
         st.markdown(f'<div class="toast">{st.session_state.toast}</div>', unsafe_allow_html=True)
-        st.session_state.toast = ""  # Clear toast
+        st.session_state.toast = ""
     
-    # Game status
-    winner = game.check_winner()
-    if winner:
+    # Check for winner
+    if game.game_over and game.winner:
         st.session_state.screen = 'game_over'
-        st.session_state.winner = winner
+        st.session_state.winner = game.winner
         st.rerun()
     
+    # Game status
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if game.current_player == 'X':
@@ -247,7 +257,7 @@ def game_screen(game: TicTacToe):
         else:
             st.metric("AI Turn", "⭕ O", delta="Thinking...")
     
-    # Game grid - Fixed button rendering
+    # Game grid
     st.markdown("---")
     for i in range(3):
         cols = st.columns(3)
@@ -256,36 +266,56 @@ def game_screen(game: TicTacToe):
                 cell_key = f"cell_{i}_{j}"
                 if game.board[i][j] == '':
                     if game.current_player == 'X':
-                        if st.button('', key=cell_key):
+                        if st.button(' ', key=cell_key):
                             if game.make_move(i, j, 'X'):
                                 st.session_state.toast = random.choice(TOASTS)
                                 st.rerun()
                     else:
-                        st.button('', key=f"empty_{i}_{j}", disabled=True)
+                        st.button(' ', key=f"wait_{i}_{j}", disabled=True)
                 else:
                     st.button(game.board[i][j], key=f"filled_{i}_{j}", disabled=True)
     
+    # AI makes move after user turn
+    if game.current_player == 'O' and not game.game_over:
+        st.rerun()  # Trigger AI move
+    
     # Reset button
-    if st.button("🔄 New Game", use_container_width=True):
-        st.session_state.game = TicTacToe()
-        st.session_state.screen = 'welcome'
-        st.session_state.toast = ""
-        st.rerun()
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col2:
+        if st.button("🔄 New Game", use_container_width=True):
+            st.session_state.game = TicTacToe()
+            st.session_state.screen = 'welcome'
+            st.session_state.toast = ""
+            st.session_state.winner = ""
+            st.rerun()
 
 def game_over_screen(game: TicTacToe):
+    """Game over celebration"""
     confetti.show()
     
-    if st.session_state.winner == 'O':
+    if game.winner == 'O':
         st.markdown(PENALTY_MESSAGE, unsafe_allow_html=True)
-    else:
+    elif game.winner == 'draw':
         st.success("🎉 It's a draw! You survived... this time! 💕")
+    else:
+        st.error("Unexpected game end state")
     
     if st.button("💕 Play Again", use_container_width=True):
         st.session_state.game = TicTacToe()
         st.session_state.screen = 'welcome'
         st.session_state.toast = ""
-        st.session_state.winner = None
+        st.session_state.winner = ""
         st.rerun()
+
+# AI move handler - runs automatically after user move
+def handle_ai_move(game: TicTacToe):
+    """Handle AI move with minimal delay"""
+    if game.current_player == 'O' and not game.game_over:
+        time.sleep(0.5)  # Quick thinking
+        best_move = get_best_move(game)
+        if best_move:
+            row, col = best_move
+            game.make_move(row, col, 'O')
 
 if __name__ == "__main__":
     main()
