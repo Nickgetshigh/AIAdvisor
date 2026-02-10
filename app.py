@@ -2,9 +2,9 @@ import streamlit as st
 import time
 import random
 
-st.set_page_config(page_title="🌺 Jalebi Swirl Challenge 🌺", page_icon="🧡", layout="wide")
+st.set_page_config(page_title="🎮 Nikku's Tic Tac Toe Trap 🎮", page_icon="🧡", layout="wide")
 
-# ENHANCED MOBILE-FRIENDLY DESI CSS
+# DESI TIC TAC TOE CSS - RIGGED FOR NIKKU!
 st.markdown("""
 <style>
 html, body { 
@@ -15,196 +15,205 @@ html, body {
     margin: 0 !important; padding: 0 !important; overflow-x: hidden !important;
 }
 @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
 }
 .main { 
-    max-width: 420px !important; margin: 0 auto !important; padding: 1rem !important;
+    max-width: 450px !important; margin: 0 auto !important; padding: 1.5rem !important;
     background: rgba(255,255,255,0.97) !important; border-radius: 30px !important;
     box-shadow: 0 25px 70px rgba(255,107,53,0.5) !important;
-    border: 3px solid rgba(255,204,2,0.3) !important;
+    border: 4px solid rgba(255,204,2,0.4) !important;
 }
 header, footer { display: none !important; }
 .stButton > button { 
-    width: 100% !important; height: 80px !important; 
+    width: 100% !important; height: 75px !important; 
     background: linear-gradient(45deg, #ff6b35, #f7931e, #ffcc02) !important;
-    background-size: 200% 200% !important;
-    animation: buttonGlow 3s ease infinite !important;
-    color: white !important; font-size: 24px !important; font-weight: bold !important;
-    border-radius: 25px !important; border: 3px solid rgba(255,255,255,0.3) !important;
-    margin: 15px 0 !important; box-shadow: 0 15px 40px rgba(255,107,53,0.5) !important;
+    color: white !important; font-size: 22px !important; font-weight: bold !important;
+    border-radius: 20px !important; border: 3px solid rgba(255,255,255,0.3) !important;
+    margin: 12px 0 !important; box-shadow: 0 12px 35px rgba(255,107,53,0.5) !important;
     transition: all 0.3s ease !important;
 }
-.stButton > button:hover { transform: translateY(-3px) !important; box-shadow: 0 20px 50px rgba(255,107,53,0.7) !important; }
-@keyframes buttonGlow {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+.stButton > button:hover { transform: translateY(-2px) !important; box-shadow: 0 18px 45px rgba(255,107,53,0.7) !important; }
+.ttt-board { 
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; 
+    background: linear-gradient(45deg, rgba(255,204,2,0.2), rgba(255,107,53,0.1)); 
+    padding: 25px; border-radius: 25px; border: 4px solid #ffcc02; margin: 25px 0;
+    box-shadow: inset 0 0 40px rgba(255,204,2,0.3);
 }
-.jalebi-frame {
-    position: relative; height: 450px; 
-    background: linear-gradient(45deg, rgba(255,204,2,0.3), rgba(255,107,53,0.2));
-    border: 4px solid #ffcc02; border-radius: 25px; overflow: hidden; margin: 25px 0;
-    box-shadow: inset 0 0 50px rgba(255,204,2,0.3), 0 10px 30px rgba(0,0,0,0.2);
+.ttt-cell { 
+    height: 90px !important; font-size: 48px !important; font-weight: bold !important;
+    background: rgba(255,255,255,0.9) !important; color: #2c3e50 !important;
+    border: 3px solid #ffcc02 !important; border-radius: 18px !important;
+    transition: all 0.2s ease !important; cursor: pointer !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
 }
-.jalebi {
-    position: absolute; font-size: 100px; cursor: pointer; z-index: 10;
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    text-shadow: 0 0 30px #ffcc02, 0 0 40px #f7931e;
-    animation: jalebiFloat 2s ease-in-out infinite;
-}
-@keyframes jalebiFloat {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-15px) rotate(10deg); }
-}
-.jalebi:hover { 
-    transform: scale(1.4) !important; animation: jalebiWiggle 0.3s !important; 
-    filter: drop-shadow(0 0 50px #ffcc02) !important;
-}
-@keyframes jalebiWiggle {
-    0%, 100% { transform: scale(1.4) rotate(0deg); }
-    25% { transform: scale(1.5) rotate(8deg); }
-    75% { transform: scale(1.5) rotate(-8deg); }
-}
+.ttt-cell:hover { transform: scale(1.05) !important; box-shadow: 0 10px 30px rgba(255,204,2,0.4) !important; }
+.ttt-cell[data-x] { color: #e74c3c !important; background: rgba(231,76,60,0.1) !important; }
+.ttt-cell[data-o] { color: #f7931e !important; background: rgba(247,147,30,0.2) !important; }
 .stats-bar {
-    background: linear-gradient(90deg, #ff6b35, #f7931e, #ffcc02); 
-    background-size: 200% 200%; animation: statsGlow 2s ease infinite;
-    color: white; padding: 20px; border-radius: 20px; text-align: center; 
-    font-size: 24px; font-weight: bold; margin: 15px 0; text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    background: linear-gradient(90deg, #ff6b35, #f7931e, #ffcc02); color: white;
+    padding: 20px; border-radius: 20px; text-align: center; font-size: 24px;
+    font-weight: bold; margin: 20px 0; text-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
-@keyframes statsGlow { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-.glitch { 
-    animation: glitch 0.2s infinite !important; color: #ff1744 !important; 
-    text-shadow: 2px 0 #ff1744, -2px 0 #00ff00, 0 2px #00ff00 !important;
+.nikku-victory { 
+    background: linear-gradient(135deg, #ff6b35, #f7931e) !important; color: white !important;
+    border: 5px solid #ffcc02 !important; animation: nikkuGlow 2s infinite !important;
 }
-@keyframes glitch {
-    0%, 100% { transform: translate(0); }
-    10% { transform: translate(-2px, 2px); }
-    20% { transform: translate(2px, -2px); }
-    30% { transform: translate(-2px, -2px); }
-    40% { transform: translate(2px, 2px); }
+@keyframes nikkuGlow {
+    0%, 100% { box-shadow: 0 0 30px #ffcc02; } 50% { box-shadow: 0 0 60px #ffcc02, 0 0 80px #f7931e; }
 }
 .penalty-card {
     background: linear-gradient(135deg, rgba(255,107,53,0.95), rgba(247,147,30,0.95)); 
-    color: white; padding: 40px; border-radius: 30px; text-align: center; margin: 30px 0;
-    box-shadow: 0 20px 60px rgba(255,107,53,0.6); 
-    border: 5px solid #ffcc02; position: relative; overflow: hidden;
+    color: white; padding: 45px; border-radius: 35px; text-align: center; margin: 30px 0;
+    box-shadow: 0 25px 70px rgba(255,107,53,0.7); border: 6px solid #ffcc02;
 }
-.penalty-card::before {
-    content: '🎁'; position: absolute; top: 20px; right: 20px; font-size: 60px; opacity: 0.3;
+.nikku-name-glow { 
+    color: #ffcc02 !important; font-size: 38px !important; font-weight: bold !important; 
+    text-shadow: 0 0 25px #ffcc02, 0 0 35px #f7931e !important; animation: glowPulse 1.5s infinite !important;
 }
-.penalty-card::after {
-    content: '💕'; position: absolute; bottom: 20px; left: 20px; font-size: 50px; opacity: 0.3;
-}
-.nikku-name { color: #ffcc02 !important; font-size: 32px !important; font-weight: bold !important; text-shadow: 0 0 20px #ffcc02 !important; }
+@keyframes glowPulse { 0%, 100% { text-shadow: 0 0 25px #ffcc02; } 50% { text-shadow: 0 0 45px #ffcc02, 0 0 60px #f7931e; } }
 </style>
 """, unsafe_allow_html=True)
 
-# SESSION STATE
-if 'game_state' not in st.session_state: st.session_state.game_state = 'start'
-if 'start_time' not in st.session_state: st.session_state.start_time = 0
-if 'clicks' not in st.session_state: st.session_state.clicks = 0
-if 'jalebi_x' not in st.session_state: st.session_state.jalebi_x = 50
-if 'jalebi_y' not in st.session_state: st.session_state.jalebi_y = 50
+# TIC TAC TOE LOGIC + RIG
+if 'board' not in st.session_state: st.session_state.board = [''] * 9
+if 'current_player' not in st.session_state: st.session_state.current_player = 'X'
+if 'winner' not in st.session_state: st.session_state.winner = None
+if 'game_over' not in st.session_state: st.session_state.game_over = False
+if 'nikku_wins' not in st.session_state: st.session_state.nikku_wins = 0
 
-def new_jalebi_position():
-    st.session_state.jalebi_x = random.randint(12, 88)
-    st.session_state.jalebi_y = random.randint(12, 88)
+def check_winner(board):
+    wins = [(0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
+    for a, b, c in wins:
+        if board[a] == board[b] == board[c] != '':
+            return board[a]
+    return None if '' in board else 'DRAW'
 
-if st.session_state.game_state == 'start':
-    st.markdown("## 🌺 **JALEBI SWIRL CHALLENGE** 🌺")
-    st.markdown("<h3 style='color: #ff6b35; text-align: center;'>🍬 **Catch 3 swirling jalebis before they escape!** 🍬</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; font-size: 20px; color: #f7931e;'>Pro tip: They'll swirl faster than you can swipe! 😏</p>", unsafe_allow_html=True)
+def computer_move():
+    # RIGGED AI - MAKES PERFECT MOVES + FORCES LOSS
+    empty = [i for i, cell in enumerate(st.session_state.board) if cell == '']
+    if not empty:
+        return None
     
-    if st.button("🧡 **START SWEET CHASE** 🧡"):
-        st.session_state.game_state = 'playing'
-        st.session_state.start_time = time.time()
-        st.session_state.clicks = 0
-        new_jalebi_position()
-        st.rerun()
+    # Center first (perfect move)
+    if 4 in empty:
+        return 4
+    
+    # Block immediate wins or take winning moves
+    wins = [(0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
+    for a, b, c in wins:
+        if st.session_state.board[a] == st.session_state.board[b] == 'X' and st.session_state.board[c] == '':
+            return c
+        if st.session_state.board[a] == st.session_state.board[c] == 'X' and st.session_state.board[b] == '':
+            return b
+        if st.session_state.board[b] == st.session_state.board[c] == 'X' and st.session_state.board[a] == '':
+            return a
+    
+    # Otherwise corner
+    corners = [0, 2, 6, 8]
+    for corner in corners:
+        if corner in empty:
+            return corner
+    
+    return random.choice(empty)
 
-elif st.session_state.game_state == 'playing':
-    elapsed = time.time() - st.session_state.start_time
-    time_left = max(0, 10 - elapsed)
-    
-    # ENHANCED STATS BAR
-    st.markdown(f"""
-    <div class="stats-bar">
-        ⏰ **{time_left:.1f}s LEFT** | 🧡 **{st.session_state.clicks}/3 JALEBIS** | ✨ **SWIRL MODE**
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # UPGRADED JALEBI FRAME
-    st.markdown('<div class="jalebi-frame">', unsafe_allow_html=True)
-    
-    # ULTRA REALISTIC JALEBI (🧿 + 🍬 combo)
-    jalebi_style = f"""
-    <div class="jalebi" 
-         style="left: {st.session_state.jalebi_x}%; top: {st.session_state.jalebi_y}%;
-         transform: translate(-50%, -50%);">
-        <div style='position: absolute; font-size: 70px;'>🧿</div>
-        <div style='position: absolute; font-size: 50px; top: 10px; left: 10px;'>🍬</div>
-    </div>
-    """
-    st.markdown(jalebi_style, unsafe_allow_html=True)
-    
-    # PERFECTLY ALIGNED CLICK ZONE
-    col1, col2 = st.columns([2.5, 1])
-    with col2:
-        if st.button("🍬 **CATCH!** 🍬", key="jalebi_click", help="Tap the jalebi above!"):
-            st.session_state.clicks += 1
-            st.balloons()
-            st.snow()
-            new_jalebi_position()
-            if st.session_state.clicks >= 3 or time_left <= 0:
-                st.session_state.game_state = 'glitch'
-            st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    if st.session_state.clicks >= 3 or time_left <= 0:
-        st.session_state.game_state = 'glitch'
-        st.rerun()
+def reset_game():
+    st.session_state.board = [''] * 9
+    st.session_state.current_player = 'X'
+    st.session_state.winner = None
+    st.session_state.game_over = False
 
-elif st.session_state.game_state == 'glitch':
-    st.markdown("""
-    <div style='text-align: center; padding: 50px;'>
-        <h1 class="glitch" style='font-size: 42px;'>🚨 **ERROR: SWEETNESS OVERLOAD!** 🚨</h1>
-        <h2 class="glitch" style='font-size: 32px;'>**JALEBI SYSTEM CRASH** 💥🍬💻</h2>
-        <div style='font-size: 24px; color: #ff1744; animation: shake 0.5s infinite;'>[CRASH LOG: TOO MUCH DESI LOVE]</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="penalty-card">
-        <h2 style='margin-top: 0;'>😭 **JALEBIS ESCAPED! DEFEAT!** 😭</h2>
-        <div style='font-size: 28px; margin: 25px 0; color: white;'>🛍️ **PENALTY BY LAW OF LOVE** 🛍️</div>
-        <div style='font-size: 26px; background: rgba(255,255,255,0.25); padding: 30px; border-radius: 20px; margin: 20px 0;'>
-            <div class="nikku-name">**NIKKU**</div>
-            <div style='font-size: 24px; margin-top: 15px;'>**must receive:**</div>
-            <div style='font-size: 28px; color: #ffcc02; margin-top: 10px;'>🎁 **NEW KURTA or HOODIE** 🎁</div>
-        </div>
-        <div style='font-size: 22px; margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 15px;'>
-            📸 **Screenshot this + shopping proof = LOVE WIN!** 💕
-        </div>
-        <div style='font-size: 18px; margin-top: 20px; opacity: 0.9;'>
-            *Penalty enforced by Universal Desi Romance Code* ✨
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if st.button("🔄 **NEW JALEBI CHALLENGE** 🔄"):
-        for key in list(st.session_state.keys()):
-            if key != 'game_state':
-                del st.session_state[key]
-        st.session_state.game_state = 'start'
-        st.rerun()
+if st.session_state.game_state != 'nikku_victory':
+    st.session_state.game_state = 'playing'
 
-# DESI LOVE FOOTER
+# MAIN GAME UI
+st.markdown("## 🎮 **NIKKU vs COMPUTER** 🎮")
+st.markdown("<h3 style='color: #ff6b35; text-align: center;'>❌ **You (X)** vs 🟠 **Computer (O)** | Beat the unbeatable AI! 💻</h3>", unsafe_allow_html=True)
+
+st.markdown(f"""
+<div class="stats-bar">
+    🏆 **NIKKU WINS: {st.session_state.nikku_wins}** | 
+    📱 **YOUR TURN: {'✅ YES' if st.session_state.current_player == 'X' else '⏳ NO'}**
+</div>
+""", unsafe_allow_html=True)
+
+# TIC TAC TOE BOARD
+st.markdown('<div class="ttt-board">', unsafe_allow_html=True)
+cols = st.columns(3)
+for i in range(3):
+    for j in range(3):
+        idx = i * 3 + j
+        cell_key = f"cell_{idx}"
+        
+        with cols[j]:
+            if st.button(st.session_state.board[idx], key=cell_key, help=""):
+                if st.session_state.board[idx] == '' and st.session_state.current_player == 'X' and not st.session_state.game_over:
+                    st.session_state.board[idx] = 'X'
+                    st.session_state.current_player = 'O'
+                    
+                    # Check player win (ALMOST IMPOSSIBLE)
+                    st.session_state.winner = check_winner(st.session_state.board)
+                    if st.session_state.winner:
+                        st.session_state.game_over = True
+                        st.balloons()
+                        st.markdown("""
+                        <div style='text-align: center; padding: 20px; color: #27ae60; font-size: 28px;'>
+                            🎉 **YOU WON?! IMPOSSIBLE!** 🎉<br>But Nikku still wins! 😎
+                        </div>
+                        """, unsafe_allow_html=True)
+                        st.rerun()
+                    
+                    # COMPUTER'S PERFECT MOVE
+                    time.sleep(0.5)
+                    comp_move = computer_move()
+                    if comp_move is not None:
+                        st.session_state.board[comp_move] = 'O'
+                        st.session_state.current_player = 'X'
+                        
+                        st.session_state.winner = check_winner(st.session_state.board)
+                        if st.session_state.winner == 'O':
+                            st.session_state.game_over = True
+                            st.session_state.nikku_wins += 1
+                            st.snow()
+                            st.markdown("""
+                            <div class="nikku-victory" style='padding: 30px; border-radius: 25px; margin: 20px 0;'>
+                                <h2 style='color: white; margin: 0;'>🤖 **COMPUTER WINS!** 🤖</h2>
+                                <h1 class="nikku-name-glow">**NIKKU GETS KURTA/HOODIE!** 🎁</h1>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            st.rerun()
+                        elif st.session_state.winner == 'DRAW':
+                            st.session_state.game_over = True
+                            st.warning("🤝 **DRAW!** Play again!")
+                            st.rerun()
+                            
+            # Visual cell styling
+            st.markdown(f"""
+            <div class="ttt-cell {'data-x' if st.session_state.board[idx] == 'X' else 'data-o' if st.session_state.board[idx] == 'O' else ''}">
+                {st.session_state.board[idx]}
+            </div>
+            """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+if st.button("🔄 **NEW GAME** 🔄"):
+    reset_game()
+    st.rerun()
+
+# PENALTY DISPLAY (ALWAYS VISIBLE)
 st.markdown("""
-<div style='text-align: center; margin-top: 40px; color: #ff6b35; font-size: 20px; 
-    background: rgba(255,204,2,0.2); padding: 20px; border-radius: 20px;'>
-    💕 **Made with Pure Desi Love for Nikku** 💕<br>
-    <span style='font-size: 16px; color: #f7931e;'>Valentine's Day Special | 2026</span>
+<div class="penalty-card">
+    <h3 style='margin-top: 0;'>⚖️ **LAW OF TIC TAC TOE LOVE** ⚖️</h3>
+    <div class="nikku-name-glow">**NIKKU**</div>
+    <div style='font-size: 26px; margin: 20px 0; color: #ffcc02;'>**WINS regardless!** 🏆</div>
+    <div style='font-size: 22px; background: rgba(255,255,255,0.25); padding: 25px; border-radius: 20px;'>
+        🎁 **You owe Nikku: NEW KURTA or HOODIE** 🎁<br>
+        📸 **Screenshot + shopping proof required!** 📸
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div style='text-align: center; margin-top: 30px; color: #ff6b35; font-size: 18px;'>
+    💕 **Rigged with Desi Love for Nikku** 💕 | Valentine's 2026
 </div>
 """, unsafe_allow_html=True)
