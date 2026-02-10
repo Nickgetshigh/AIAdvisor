@@ -6,30 +6,26 @@ import base64
 import io
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="For You", page_icon="❤️", layout="centered")
+st.set_page_config(page_title="For My Girl", page_icon="💖", layout="centered")
 
-# --- CUSTOM CSS FOR THEME ---
+# --- CSS FOR THEME ---
 st.markdown("""
     <style>
     .stApp {
-        background-color: #fff0f3;
+        background-color: #fceef5;
     }
     h1 {
-        color: #ff4d6d;
+        color: #d63384;
         text-align: center;
-        font-family: 'Georgia', serif;
+        font-family: 'Dancing Script', cursive;
+        font-size: 3rem !important;
     }
     .stButton>button {
-        background-color: #ff4d6d;
+        background-color: #d63384;
         color: white;
-        border-radius: 20px;
+        border-radius: 30px;
         border: none;
-        padding: 10px 25px;
-        transition: 0.3s;
-    }
-    .stButton>button:hover {
-        background-color: #ff758f;
-        border: 1px solid white;
+        font-weight: bold;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -42,64 +38,67 @@ def get_lottie(url):
     except:
         return None
 
-lottie_url = "https://lottie.host/8040409a-6756-4299-9759-33b68051a029/9f7l8fX7y9.json"
-lottie_hearts = get_lottie(lottie_url)
+# Soft romantic heart animation
+lottie_hearts = get_lottie("https://lottie.host/8040409a-6756-4299-9759-33b68051a029/9f7l8fX7y9.json")
 
 # --- AUDIO FUNCTION ---
 def play_audio(text, lang):
     try:
-        # Added a bit of 'slow' for a softer Hindi delivery
-        tts = gTTS(text=text, lang=lang, slow=False)
+        # 'slow=True' makes the voice sound a bit more deliberate/soft
+        tts = gTTS(text=text, lang=lang, slow=True)
         fp = io.BytesIO()
         tts.write_to_fp(fp)
         fp.seek(0)
         audio_b64 = base64.b64encode(fp.read()).decode()
         audio_tag = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
         st.markdown(audio_tag, unsafe_allow_html=True)
-    except Exception as e:
+    except:
         pass
 
-# --- APP LOGIC ---
+# --- SESSION STATE ---
 if 'language' not in st.session_state:
     st.session_state.language = 'Chinese'
 
+# --- DISPLAY ---
 if lottie_hearts:
-    st_lottie(lottie_hearts, height=250, key="main_heart")
+    st_lottie(lottie_hearts, height=300, key="romance")
 
-# Content Management
+# Question Logic
 if st.session_state.language == 'Chinese':
-    main_text = "你会跟我做爱吗？" # Chinese for the updated request
+    # "Babe, do you want to bite me?" in Chinese
+    main_text = "宝贝，你想咬我吗？" 
     lang_code = 'zh-cn'
     btn_label = "Translate to Hindi 🇮🇳"
 else:
-    # Hindi for the updated request
-    main_text = "क्या तुम मेरे साथ हमबिस्तर होगी?" 
+    # "Babe, do you want to bite me?" in Hindi
+    main_text = "बेबी, क्या तुम मुझे काटना चाहती हो?" 
     lang_code = 'hi'
     btn_label = "Translate to Chinese 🇨🇳"
 
-# Display Text
+# Display the question
 st.markdown(f"<h1>{main_text}</h1>", unsafe_allow_html=True)
 
-# Translation Button
-col1, col2, col3 = st.columns([1, 2, 1])
+# Audio Autoplay
+play_audio(main_text, lang_code)
+
+# Language Toggle
+col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    if st.button(btn_label, use_container_width=True):
+    if st.button(btn_label):
         st.session_state.language = 'Hindi' if st.session_state.language == 'Chinese' else 'Chinese'
         st.rerun()
 
-# Play Audio
-play_audio(main_text, lang_code)
-
 st.write("---")
-c1, c2 = st.columns(2)
 
+# Buttons
+c1, c2 = st.columns(2)
 with c1:
-    if st.button("YES! 😍", use_container_width=True):
+    if st.button("YES! 🦷❤️", use_container_width=True):
         st.balloons()
-        # Celebration animation
+        st.markdown("<h2 style='text-align:center;'>Ouch! But I love it. 😘</h2>", unsafe_allow_html=True)
         celebrate = get_lottie("https://lottie.host/67702580-f00a-42fb-a7e8-e4b779a5e8c1/m8n8C0zE9Y.json")
         st_lottie(celebrate, height=200)
 
 with c2:
-    if st.button("No 😢", use_container_width=True):
-        st.warning("Try again! 😉")
+    if st.button("No 🥺", use_container_width=True):
+        st.write("Why not? I'm delicious! 🍫")
