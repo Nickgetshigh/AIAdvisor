@@ -6,39 +6,43 @@ import base64
 import io
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="Global Love", page_icon="💖", layout="centered")
+st.set_page_config(page_title="Global Love App", page_icon="🔞", layout="centered")
 
-# --- CUSTOM CSS ---
+# --- UI STYLING ---
 st.markdown("""
     <style>
-    .stApp { background: linear-gradient(to right, #ff9a9e 0%, #fecfef 100%); }
+    .stApp { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
     .main-text {
-        background-color: rgba(255, 255, 255, 0.4);
-        padding: 20px;
-        border-radius: 15px;
-        border: 2px solid #ff4d6d;
-        color: #d63384;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+        padding: 25px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        color: #8338ec;
         text-align: center;
-        font-family: 'Arial', sans-serif;
-        font-size: 24px;
+        font-size: 22px;
         font-weight: bold;
         margin-bottom: 20px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
     }
     .stButton>button {
         background-color: #ff4d6d;
         color: white;
-        border-radius: 12px;
+        border-radius: 15px;
         border: none;
-        transition: 0.3s;
+        height: 3.5rem;
+        font-size: 16px;
+        transition: all 0.3s ease;
     }
     .stButton>button:hover {
-        background-color: #c9184a;
-        transform: translateY(-2px);
+        background-color: #ff0a54;
+        transform: scale(1.03);
+        box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4);
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- UTILITY FUNCTIONS ---
+# --- CORE FUNCTIONS ---
 def get_lottie(url):
     try:
         r = requests.get(url, timeout=3)
@@ -52,21 +56,20 @@ def play_audio(text, lang):
         tts.write_to_fp(fp)
         fp.seek(0)
         audio_b64 = base64.b64encode(fp.read()).decode()
+        # Custom HTML to trigger autoplay
         audio_tag = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
         st.markdown(audio_tag, unsafe_allow_html=True)
-    except: pass
+    except: st.error("Audio failed to load.")
 
-# --- APP ASSETS ---
-lottie_main = get_lottie("https://lottie.host/8040409a-6756-4299-9759-33b68051a029/9f7l8fX7y9.json")
-if lottie_main:
-    st_lottie(lottie_main, height=200, key="main")
+# --- ASSETS ---
+lottie_heart = get_lottie("https://lottie.host/8040409a-6756-4299-9759-33b68051a029/9f7l8fX7y9.json")
 
-# --- LANGUAGE DATA ---
+# --- DATA ---
 msg_data = {
     "Sanskrit 🕉️": {"txt": "प्रिये, किं भवती मां दंष्टुं, आलिङ्गितुं, मैथुनं कर्तुं, लेढुं च इच्छति? मम वैलेंटाइन भव।", "code": "hi"},
     "Hindi 🇮🇳": {"txt": "बेबी गर्ल, क्या तुम मुझे काटना, गले लगाना, मेरे साथ हमबिस्तर होना और चाटना चाहती हो? मेरी वैलेंटाइन बन जाओ।", "code": "hi"},
     "Telugu 🇮🇳": {"txt": "బేబీ గర్ల్, నువ్వు నన్ను తినాలనుకుంటున్నావా, కరవాలనుకుంటున్నావా, హత్తుకోవాలనుకుంటున్నావా, నాతో కలవాలనుకుంటున్నావా మరియు నాకాలనుకుంటున్నావా? నా వాలెంటైన్ అవుతావా.", "code": "te"},
-    "Tamil 🇮🇳": {"txt": "பேபி கேர்ள், நீ என்னை சாப்பிட, கடிக்க, கட்டிப்பிடிக்க, என்னுடன் உறவு கொள்ள மற்றும் நக்க விரும்புகிறாயா? என் காதலியாக இரு.", "code": "ta"},
+    "Tamil 🇮🇳": {"txt": "பேபி கேர்ள், நீ என்னை சாப்பிட, கடிக்க, கட்டிப்பிடிக்க, என்னுடன் உறவு கொள்ள மற்றும் நக்க விரும்புகிறாயा? என் காதலியாக இரு.", "code": "ta"},
     "Kannada 🇮🇳": {"txt": "ಬೇಬಿ ಗರ್ಲ್, ನೀನು ನನ್ನನ್ನು ತಿನ್ನಲು, ಕಚ್ಚಲು, ಅಪ್ಪಿಕೊಳ್ಳಲು, ನನ್ನೊಂದಿಗೆ ಸಂಭೋಗಿಸಲು ಮತ್ತು ನೆಕ್ಕಲು ಬಯಸುವಿರಾ? ನನ್ನ ವ್ಯಾಲೆಂಟೈನ್ ಆಗು.", "code": "kn"},
     "Malayalam 🇮🇳": {"txt": "ബേബി ഗേൾ, നിനക്ക് എന്നെ കഴിക്കണോ, കടിക്കണോ, കെട്ടിപ്പിടിക്കണോ, എന്നോടൊപ്പം ശയിക്കണോ, നക്കണോ? എന്റെ വാലന്റൈൻ ആകുക.", "code": "ml"},
     "English 🇬🇧": {"txt": "Bbygirl, do you wanna eat me, bite me, hug me, fuck me, lick me? And be my valentine.", "code": "en"},
@@ -79,33 +82,35 @@ msg_data = {
     "Italian 🇮🇹": {"txt": "Bbygirl, vuoi mangiarmi, mordermi, abbracciarmi, scoparmi, leccarmi? E sii il mio Valentino.", "code": "it"}
 }
 
-# Initialize choice
-if 'current_text' not in st.session_state:
-    st.session_state.current_text = "Select a language to see and hear the message..."
+# --- UI LAYOUT ---
+if lottie_heart:
+    st_lottie(lottie_heart, height=220, key="main_ani")
 
-# Display Content Box
-st.markdown(f'<div class="main-text">{st.session_state.current_text}</div>', unsafe_allow_html=True)
+if 'display_text' not in st.session_state:
+    st.session_state.display_text = "Choose a language to hear my heart... ❤️"
 
-# Button Grid (2 columns for desktop, looks good on mobile too)
+st.markdown(f'<div class="main-text">{st.session_state.display_text}</div>', unsafe_allow_html=True)
+
+# Grid for buttons
 cols = st.columns(2)
 for i, (name, info) in enumerate(msg_data.items()):
     with cols[i % 2]:
         if st.button(name, use_container_width=True):
-            st.session_state.current_text = info['txt']
+            st.session_state.display_text = info['txt']
             play_audio(info['txt'], info['code'])
             st.rerun()
 
-st.markdown("<br><hr>", unsafe_allow_html=True)
+st.write("---")
 
-# Final Acceptance
+# The BIG Question
 c1, c2 = st.columns(2)
 with c1:
-    if st.button("YES! 😍", key="yes_btn"):
+    if st.button("YES! 😍", key="big_yes"):
         st.balloons()
-        st.success("Best Valentine's Day Ever!")
-        lottie_celeb = get_lottie("https://lottie.host/67702580-f00a-42fb-a7e8-e4b779a5e8c1/m8n8C0zE9Y.json")
-        if lottie_celeb: st_lottie(lottie_celeb, height=150)
+        st.success("I knew you couldn't resist! ❤️")
+        celeb = get_lottie("https://lottie.host/67702580-f00a-42fb-a7e8-e4b779a5e8c1/m8n8C0zE9Y.json")
+        if celeb: st_lottie(celeb, height=150, key="celeb_ani")
 
 with c2:
-    if st.button("No 🥺", key="no_btn"):
-        st.error("Access Denied: You belong to me! 😉")
+    if st.button("No 🥺", key="big_no"):
+        st.toast("Error: Selection impossible. Try 'YES' instead! 😉")
