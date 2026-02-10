@@ -1,102 +1,95 @@
 import streamlit as st
 import time
+import random
 
-st.set_page_config(page_title="🔥 दिल का क्लिकर धमाका 🔥", page_icon="❤️")
+st.set_page_config(page_title="💔 Catch the Elusive Heart 💔", page_icon="❤️")
 
-# Initialize
-if 'hearts' not in st.session_state: st.session_state.hearts = 0
-if 'rupees' not in st.session_state: st.session_state.rupees = 0
-if 'cps' not in st.session_state: st.session_state.cps = 0
-if 'upgrades' not in st.session_state:
-    st.session_state.upgrades = {'bhabhi': 0, 'padosan': 0, 'sautan': 0, 'desi_cupid': 0}
-if 'last_time' not in st.session_state: st.session_state.last_time = time.time()
+# Initialize session state
+if 'game_state' not in st.session_state:
+    st.session_state.game_state = 'start'  # start, playing, lost, dare_selected
+if 'start_time' not in st.session_state:
+    st.session_state.start_time = 0
+if 'heart_pos' not in st.session_state:
+    st.session_state.heart_pos = (0, 0)
+if 'time_left' not in st.session_state:
+    st.session_state.time_left = 30
 
 st.markdown("""
 <style>
-.main {background: linear-gradient(45deg, #ff4444, #ffaa00, #ff4444);}
-.stButton > button {background: #d63384; color: gold; font-weight: bold; font-size: 24px; border: 3px solid gold;}
-h1 {color: #ff1493; text-shadow: 2px 2px gold;}
-.metric {font-size: 2.5em; color: #ff69b4;}
+.main {background: linear-gradient(45deg, #ff69b4, #ff1493);}
+.stButton > button {height: 120px; width: 120px; font-size: 40px; border-radius: 50%;}
 </style>
 """, unsafe_allow_html=True)
 
-## 🔥 MAIN DHAMAKA SCREEN 🔥
-st.markdown("## 😂🔥 **DIL KA CLICKER DHAMAKA** 🔥😂")
-st.markdown("**भाई click करो ये दिल तोड़ो! 💔 प्यार के रुपये कमाओ! हर upgrade में desi comedy!** 🎭")
+## GAME LOGIC
+if st.session_state.game_state == 'start':
+    st.title("💕 **Catch the Elusive Heart Challenge** 💕")
+    st.write("Click the ❤️ within 30 seconds! It keeps moving... Good luck! 😈")
+    
+    if st.button("🎮 **START CHALLENGE** 🎮", use_container_width=True):
+        st.session_state.game_state = 'playing'
+        st.session_state.start_time = time.time()
+        st.session_state.time_left = 30
+        st.session_state.heart_pos = (random.randint(1, 10), random.randint(1, 8))
+        st.rerun()
 
-col1, col2, col3 = st.columns(3)
-with col1: st.metric("💔 दिल टूटे", f"{int(st.session_state.hearts):,}")
-with col2: st.metric("💰 रुपये/sec", st.session_state.cps)
-with col3: st.metric("😂 मसाला लेवल", sum(st.session_state.upgrades.values()))
+elif st.session_state.game_state == 'playing':
+    # Timer countdown
+    elapsed = time.time() - st.session_state.start_time
+    st.session_state.time_left = max(0, 30 - elapsed)
+    
+    st.markdown(f"## ⏰ **Time Left: {st.session_state.time_left:.1f}s** ⏰")
+    
+    # Move heart every rerun (simulates movement)
+    if st.session_state.time_left > 0:
+        st.session_state.heart_pos = (random.randint(1, 10), random.randint(1, 8))
+    
+    # GAME BOARD - 8x10 grid
+    st.markdown("### **Find the Heart! 👀**")
+    for row in range(1, 9):
+        cols = st.columns(10)
+        for col in range(1, 11):
+            with cols[col-1]:
+                pos_key = f"{row}_{col}"
+                if st.button("❤️", key=f"heart_{row}_{col}_{int(time.time())}") and (row, col) == st.session_state.heart_pos:
+                    st.session_state.game_state = 'won'
+                    st.success("🎉 YOU CAUGHT IT! True love skills! 💑")
+                    st.balloons()
+                    st.rerun()
+    
+    # Check if time up
+    if st.session_state.time_left <= 0:
+        st.session_state.game_state = 'lost'
+        st.error("💥 **TIME UP! The heart escaped!** 😭")
+        st.rerun()
 
-# GIANT HEART BUTTON
-if st.button("💔 **DIL TOD DO BHAI!** 💔", use_container_width=True):
-    bonus = 1 + st.session_state.upgrades['bhabhi'] * 2
-    st.session_state.hearts += bonus
-    st.session_state.rupees += bonus * 0.1
-    st.balloons()
-    st.session_state.last_time = time.time()
-    st.rerun()
+elif st.session_state.game_state == 'lost':
+    st.markdown("## 💔 **HEART ESCAPED! PENALTY TIME** 💔")
+    st.write("Pick a **Valentine Dare** to redeem yourself! 😜")
+    
+    dares = [
+        "💃 **Dance like nobody's watching** (Send video!)",
+        "🍫 **Buy chocolates for your crush** (Receipt proof!)", 
+        "📝 **Write a love poem** (Share screenshot!)",
+        "🎤 **Sing a love song** (Voice note dare!)",
+        "🌹 **Gift a flower** (Photo evidence!)"
+    ]
+    
+    dare_choice = st.radio("Choose your dare:", dares, key="dare_select")
+    
+    if st.button("✅ **I ACCEPT THIS DARE!**", use_container_width=True):
+        st.session_state.game_state = 'dare_selected'
+        st.success(f"**Great choice! Complete: '{dare_choice}'** 🎉")
+        st.balloons()
+        st.rerun()
 
-# Auto rupees
-delta = time.time() - st.session_state.last_time
-st.session_state.hearts += st.session_state.cps * delta * 0.1
-st.session_state.rupees += st.session_state.cps * delta
-st.session_state.last_time = time.time()
-
-## 🎭 DESI GAALI JOKES
-jokes = [
-    "तेरी भाभी ने like ठोका! 😂 +5 hearts",
-    "पड़ोसन ने आँख मार दी! 😏 रुपये double!",
-    "सौतन जल गयी! 🔥 Free boost भाई!",
-    "कुत्ते ने दिल चुरा लिया! 🐕💔 हाहाहा!",
-    "मम्मी ने पकड़ लिया! 😱 Game over almost!",
-    "Cupid ने thappad मार दिया! 💥 +100 hearts"
-]
-if st.session_state.hearts > 10:
-    st.error(f"**{jokes[int(st.session_state.hearts/50) % len(jokes)]}**")
-
-## 🛒 DESI UPGRADES SHOP 🛒
-st.markdown("---")
-st.subheader("🛍️ **DESI UPGRADE DHABA** 🛍️")
-
-upgrades = [
-    {'name': '👩‍🦰 भाभी का झटका', 'cost': 15, 'cps': 0.2, 'key': 'bhabhi', 'emoji': '😍🔥'},
-    {'name': '😘 पड़ोसन पावर', 'cost': 75, 'cps': 1, 'key': 'padosan', 'emoji': '😏💋'},
-    {'name': '😡 सौतन का जलन', 'cost': 300, 'cps': 5, 'key': 'sautan', 'emoji': '🔥💥'},
-    {'name': '🏹 देसी कपिड धमाल', 'cost': 1000, 'cps': 20, 'key': 'desi_cupid', 'emoji': '💘🚀'}
-]
-
-for up in upgrades:
-    col1, col2 = st.columns([3,1])
-    with col1:
-        st.markdown(f"**{up['emoji']} {up['name']}** (x{st.session_state.upgrades[up['key']]})")
-    with col2:
-        if st.button(f"₹{up['cost']}", key=f"buy_{up['key']}"):
-            if st.session_state.rupees >= up['cost']:
-                st.session_state.rupees -= up['cost']
-                st.session_state.upgrades[up['key']] += 1
-                st.session_state.cps += up['cps']
-                st.snow() if 'पड़ोसन' in up['name'] else st.balloons()
-                st.success(f"{up['name']} खरीद ली भाई! अब कमाई होगी!")
-                st.rerun()
-            else:
-                st.error("**पैसे कम हैं भाई! और click करो!** 😭")
-
-# RESET
-if st.button("🔄 **नया धमाल शुरू करो**", key="reset"):
+elif st.session_state.game_state == 'dare_selected':
+    st.success("✅ **Dare assigned! Share proof to play again!** 💕")
+    
+# Play Again Button (all states)
+if st.button("🔄 **NEW GAME**", key="restart"):
     for key in st.session_state:
-        if key not in ['last_time']:
-            st.session_state[key] = 0 if isinstance(st.session_state[key], int) else {}
+        if key not in ['game_state']:
+            del st.session_state[key]
+    st.session_state.game_state = 'start'
     st.rerun()
-
-# VICTORY
-if st.session_state.hearts >= 5000:
-    st.markdown("""
-    <div style='text-align:center; background:gold; padding:20px; border-radius:15px;'>
-    <h1>🎉 **TRUE INDIAN LOVE BOSS** 🎉</h1>
-    <h2>5000+ दिल तोड़े! पूरा मोहल्ला जल गया! 🔥😂</h2>
-    </div>
-    """, unsafe_allow_html=True)
-    st.balloons()
-    st.snow()
