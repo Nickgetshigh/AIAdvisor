@@ -27,6 +27,16 @@ st.markdown("""
         background-color: #ff4d6d;
         transform: scale(1.05);
     }
+    .message-box {
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid white;
+        text-align: center;
+        color: white;
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
     hr { border: 1px solid #ffffff; }
     </style>
     """, unsafe_allow_html=True)
@@ -57,10 +67,10 @@ if lottie_main:
 st.markdown("<h2 style='text-align: center; color: white;'>Press a button to hear me...</h2>", unsafe_allow_html=True)
 
 # --- LANGUAGE DATA ---
-# The message requested: "Bbygirl do you wanna eat me bite me hug me fuck me lick me? And be my valentine"
 msg_data = {
     "Sanskrit 🕉️": {"txt": "प्रिये, किं भवती मां खादितुं, दंष्टुं, आलिङ्गितुं, मैथुनं कर्तुं, लेढुं च इच्छति? मम वैलेंटाइन भव।", "code": "hi"},
     "Hindi 🇮🇳": {"txt": "बेबी गर्ल, क्या तुम मुझे खाना, काटना, गले लगाना, मेरे साथ हमबिस्तर होना और चाटना चाहती हो? मेरी वैलेंटाइन बन जाओ।", "code": "hi"},
+    "Telugu 🇮🇳": {"txt": "బేబీ గర్ల్, నువ్వు నన్ను తినాలనుకుంటున్నావా, కరవాలనుకుంటున్నావా, కౌగిలించుకోవాలనుకుంటున్నావా, నాతో కలవాలనుకుంటున్నావా, నాకాలనుకుంటున్నావా? నా వాలెంటైన్ అవుతావా?", "code": "te"},
     "German 🇩🇪": {"txt": "Bbygirl, willst du mich essen, mich beißen, mich umarmen, mich ficken, mich lecken? Und sei mein Valentin.", "code": "de"},
     "Spanish 🇪🇸": {"txt": "Bbygirl, ¿quieres comerme, morderme, abrazarme, follarme, lamerme? Y sé mi Valentín.", "code": "es"},
     "Turkish 🇹🇷": {"txt": "Bbygirl, beni yemek mi, ısırmak mı, sarılmak mı, sikmek mi, yalamak mı istiyorsun? Ve sevgilim ol.", "code": "tr"},
@@ -76,6 +86,9 @@ cols = st.columns(2)
 for i, (name, info) in enumerate(msg_data.items()):
     with cols[i % 2]:
         if st.button(name):
+            # Display text on screen
+            st.markdown(f'<div class="message-box">{info["txt"]}</div>', unsafe_allow_html=True)
+            # Play audio
             play_audio(info['txt'], info['code'])
 
 st.markdown("<br><hr>", unsafe_allow_html=True)
