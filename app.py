@@ -8,52 +8,40 @@ import io
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="For My Bbygirl", page_icon="🔞", layout="centered")
 
-# --- CUSTOM ROMANTIC CSS ---
+# --- CSS STYLING ---
 st.markdown("""
     <style>
-    .stApp { background: linear-gradient(to bottom, #1a1a2e, #16213e); }
+    .stApp { background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e); }
     .stButton>button {
-        background-color: #e94560;
+        background-color: #ff0055;
         color: white;
-        border-radius: 12px;
+        border-radius: 10px;
         height: 3.5em;
         width: 100%;
         border: none;
         font-weight: bold;
-        font-size: 16px;
         transition: 0.3s;
     }
     .stButton>button:hover {
-        background-color: #ff2e63;
-        transform: translateY(-2px);
-        box-shadow: 0px 4px 15px rgba(233, 69, 96, 0.4);
+        background-color: #ff5e91;
+        box-shadow: 0px 0px 20px #ff0055;
     }
     .message-box {
-        background-color: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.6);
         padding: 25px;
         border-radius: 15px;
-        border: 1px solid #e94560;
+        border: 2px solid #ff0055;
         text-align: center;
-        color: #ff2e63;
-        font-size: 20px;
+        color: #ffdae0;
+        font-size: 22px;
         margin-bottom: 20px;
-        font-style: italic;
-        font-weight: bold;
+        font-family: 'Georgia', serif;
     }
-    hr { border: 0.5px solid #e94560; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- UTILITY FUNCTIONS ---
-def get_lottie(url):
-    try:
-        r = requests.get(url, timeout=3)
-        return r.json() if r.status_code == 200 else None
-    except: return None
-
 def play_audio(text, lang):
     try:
-        # Using 'en-uk' or 'en-au' sometimes triggers a deeper voice profile in gTTS
         tts = gTTS(text=text, lang=lang, slow=False)
         fp = io.BytesIO()
         tts.write_to_fp(fp)
@@ -63,36 +51,33 @@ def play_audio(text, lang):
         st.markdown(audio_tag, unsafe_allow_html=True)
     except: st.error("Audio Error")
 
-# --- APP LAYOUT ---
-lottie_url = "https://lottie.host/8040409a-6756-4299-9759-33b68051a029/9f7l8fX7y9.json"
-lottie_main = get_lottie(lottie_url)
-if lottie_main:
-    st_lottie(lottie_main, height=250, key="main")
+st.markdown("<h1 style='text-align: center; color: #ff0055;'>Naughty Desires... 🔥</h1>", unsafe_allow_html=True)
 
-st.markdown("<h2 style='text-align: center; color: white;'>Do you want me?</h2>", unsafe_allow_html=True)
-
-# --- RHYTHMIC RHYMING DATA ---
-# Note: 'en-uk' is used for a deeper, more formal tone which can sound more masculine
+# --- THE SPICY RHYMES ---
 msg_data = {
     "English 🇬🇧": {
-        "txt": "So you want me, and you need me... Come and please me, keep it steamy. Up and down, and round and round... I’m the best thing that you’ve found.", 
-        "code": "en-uk" 
+        "txt": "I know you want it, I know you’re wet. I’m the best mistake you haven’t made yet. Up and down, I’ll make you moan, I’m taking you to the danger zone.", 
+        "code": "en-au" # Australian usually sounds deeper/more masculine
     },
-    "Spanish 🇪🇸": {
-        "txt": "Tú me quieres, tú me llamas... Ven ahora a mi cama. De arriba abajo, sin descansar... Te voy a hacer vibrar.", 
-        "code": "es"
+    "Telugu 🇮🇳": {
+        "txt": "Nee vanti vedi, naaku telusu... nee korika teerustha, idi na varusa. Paiki kindaki, ninnu tipputha... gichhi gichhi, ninnu munchutha.", 
+        "code": "te"
+    },
+    "Urdu 🇵🇰": {
+        "txt": "Tumhara badan garam hai, mera irada kharab... Raat bhar jagayenge, mitaenge har khwab. Upar niche, har jagah... Dunga tumhe asli maza.", 
+        "code": "ur"
+    },
+    "Afghani (Dari) 🇦🇫": {
+        "txt": "Badanat garm as, labat teshna... Bia pesham bacha, nako nakhra. Bala o payin, dar khedmatat... Mekonum emshab, qurbanat.", 
+        "code": "fr" # Note: gTTS doesn't support Dari/Pashto natively. Using 'fr' or 'ar' as a placeholder or you can use English text with Afghani accent.
     },
     "Hindi 🇮🇳": {
-        "txt": "Chaho mujhe, ya karo intezaar... Aa jao paas, mitao pyaas. Upar niche, gol gol... Dil ki baatein, ab tu khol.", 
+        "txt": "Tadap rahi ho tum, mujhe sab pata hai... Mere sath bitao raat, yahi saza hai. Upar niche, round and round... Karege dhamaka, no other sound.", 
         "code": "hi"
-    },
-    "French 🇫🇷": {
-        "txt": "Tu me veux, tu me tiens... Viens ici, tu es mienne. De haut en bas, tout en rondeur... Je vais conquérir ton cœur.", 
-        "code": "fr"
     }
 }
 
-# --- BUTTON GRID ---
+# --- LAYOUT ---
 cols = st.columns(2)
 for i, (name, info) in enumerate(msg_data.items()):
     with cols[i % 2]:
@@ -100,15 +85,8 @@ for i, (name, info) in enumerate(msg_data.items()):
             st.markdown(f'<div class="message-box">{info["txt"]}</div>', unsafe_allow_html=True)
             play_audio(info['txt'], info['code'])
 
-st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
-# --- INTERACTIVE BUTTONS ---
-c1, c2 = st.columns(2)
-with c1:
-    if st.button("YES! 😍"):
-        st.balloons()
-        st.write("### See you soon, baby! 🔥")
-
-with c2:
-    if st.button("No 🥺"):
-        st.write("Error: Option 'No' is currently out of service. ❤️")
+if st.button("READY FOR MORE? 😈"):
+    st.snow()
+    st.write("<h3 style='text-align: center; color: white;'>Check your DMs... I'm coming over.</h3>", unsafe_allow_html=True)
