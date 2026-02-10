@@ -1,67 +1,114 @@
 import streamlit as st
 from streamlit_lottie import st_lottie
 import requests
+from gtts import gTTS
+import base64
+import io
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="For My Bbygirl", page_icon="🔞", layout="centered")
 
-# --- CSS ---
+# --- CUSTOM ROMANTIC CSS ---
 st.markdown("""
     <style>
-    .stApp { background: linear-gradient(to bottom, #2c003e, #fe2851); }
+    .stApp { background: linear-gradient(to bottom, #1a1a2e, #16213e); }
     .stButton>button {
-        background-color: #ff0055; color: white; border-radius: 15px;
-        height: 4em; width: 100%; border: none; font-weight: bold;
+        background-color: #e94560;
+        color: white;
+        border-radius: 12px;
+        height: 3.5em;
+        width: 100%;
+        border: none;
+        font-weight: bold;
+        font-size: 16px;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        background-color: #ff2e63;
+        transform: translateY(-2px);
+        box-shadow: 0px 4px 15px rgba(233, 69, 96, 0.4);
     }
     .message-box {
-        background: rgba(0, 0, 0, 0.5); padding: 20px; border-radius: 15px;
-        text-align: center; color: white; font-style: italic; margin-bottom: 20px;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 25px;
+        border-radius: 15px;
+        border: 1px solid #e94560;
+        text-align: center;
+        color: #ff2e63;
+        font-size: 20px;
+        margin-bottom: 20px;
+        font-style: italic;
+        font-weight: bold;
     }
+    hr { border: 0.5px solid #e94560; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- JAVASCRIPT VOICE ENGINE ---
-def local_speak(text, lang_code):
-    # This JS finds a male voice and speaks
-    js_code = f"""
-        <script>
-        var msg = new SpeechSynthesisUtterance();
-        msg.text = "{text}";
-        msg.lang = "{lang_code}";
-        
-        // Try to find a male voice
-        var voices = window.speechSynthesis.getVoices();
-        var maleVoice = voices.find(voice => voice.name.includes('Male') || voice.name.includes('David') || voice.name.includes('Google UK English Male'));
-        
-        if (maleVoice) {{
-            msg.voice = maleVoice;
-        }}
-        msg.pitch = 0.8; // Lower pitch for sexier tone
-        msg.rate = 0.9;  // Slightly slower
-        window.speechSynthesis.speak(msg);
-        </script>
-    """
-    st.components.v1.html(js_code, height=0)
+# --- UTILITY FUNCTIONS ---
+def get_lottie(url):
+    try:
+        r = requests.get(url, timeout=3)
+        return r.json() if r.status_code == 200 else None
+    except: return None
+
+def play_audio(text, lang):
+    try:
+        # Using 'en-uk' or 'en-au' sometimes triggers a deeper voice profile in gTTS
+        tts = gTTS(text=text, lang=lang, slow=False)
+        fp = io.BytesIO()
+        tts.write_to_fp(fp)
+        fp.seek(0)
+        audio_b64 = base64.b64encode(fp.read()).decode()
+        audio_tag = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
+        st.markdown(audio_tag, unsafe_allow_html=True)
+    except: st.error("Audio Error")
 
 # --- APP LAYOUT ---
-st.markdown("<h2 style='text-align: center; color: white;'>Touch a language to hear me...</h2>", unsafe_allow_html=True)
+lottie_url = "https://lottie.host/8040409a-6756-4299-9759-33b68051a029/9f7l8fX7y9.json"
+lottie_main = get_lottie(lottie_url)
+if lottie_main:
+    st_lottie(lottie_main, height=250, key="main")
 
-lyric_txt = "So you want me, and you need me... Come bby to me, right now, now, now. Bbygirl I'll take you up and down, Spinning your heart round and round."
+st.markdown("<h2 style='text-align: center; color: white;'>Do you want me?</h2>", unsafe_allow_html=True)
 
+# --- RHYTHMIC RHYMING DATA ---
+# Note: 'en-uk' is used for a deeper, more formal tone which can sound more masculine
 msg_data = {
-    "English 🇬🇧": {"txt": lyric_txt, "code": "en-US"},
-    "Telugu 🇮🇳": {"txt": "నీకు నేను కావాలి, నీకు నా అవసరం ఉంది. ఇప్పుడే నా దగ్గరకు రా. నిన్ను పైకి కిందకి తీసుకెళ్తా, లోకాన్ని చుట్టూ తిప్పుతా.", "code": "te-IN"},
-    "Hindi 🇮🇳": {"txt": "तुम्हें मेरी चाहत है, तुम्हें मेरी ज़रूरत है. अभी मेरे पास आओ. मैं तुम्हें ऊपर-नीचे ले जाऊंगा, और गोल-गोल घुमाऊंगा।", "code": "hi-IN"},
-    "Spanish 🇪🇸": {"txt": "Me quieres y me necesitas. Ven a mí ahora mismo. Te llevaré de arriba abajo, dándote vueltas una y otra vez.", "code": "es-ES"}
+    "English 🇬🇧": {
+        "txt": "So you want me, and you need me... Come and please me, keep it steamy. Up and down, and round and round... I’m the best thing that you’ve found.", 
+        "code": "en-uk" 
+    },
+    "Spanish 🇪🇸": {
+        "txt": "Tú me quieres, tú me llamas... Ven ahora a mi cama. De arriba abajo, sin descansar... Te voy a hacer vibrar.", 
+        "code": "es"
+    },
+    "Hindi 🇮🇳": {
+        "txt": "Chaho mujhe, ya karo intezaar... Aa jao paas, mitao pyaas. Upar niche, gol gol... Dil ki baatein, ab tu khol.", 
+        "code": "hi"
+    },
+    "French 🇫🇷": {
+        "txt": "Tu me veux, tu me tiens... Viens ici, tu es mienne. De haut en bas, tout en rondeur... Je vais conquérir ton cœur.", 
+        "code": "fr"
+    }
 }
 
+# --- BUTTON GRID ---
 cols = st.columns(2)
 for i, (name, info) in enumerate(msg_data.items()):
     with cols[i % 2]:
         if st.button(name):
             st.markdown(f'<div class="message-box">{info["txt"]}</div>', unsafe_allow_html=True)
-            local_speak(info['txt'], info['code'])
+            play_audio(info['txt'], info['code'])
 
-if st.button("YES! 😍"):
-    st.balloons()
-    st.markdown("<h3 style='text-align: center; color: white;'>You're mine. ❤️</h3>", unsafe_allow_html=True)
+st.markdown("<br><hr>", unsafe_allow_html=True)
+
+# --- INTERACTIVE BUTTONS ---
+c1, c2 = st.columns(2)
+with c1:
+    if st.button("YES! 😍"):
+        st.balloons()
+        st.write("### See you soon, baby! 🔥")
+
+with c2:
+    if st.button("No 🥺"):
+        st.write("Error: Option 'No' is currently out of service. ❤️")
