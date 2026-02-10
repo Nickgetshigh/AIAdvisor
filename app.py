@@ -6,109 +6,108 @@ import base64
 import io
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="Private Session", page_icon="🔥", layout="centered")
+st.set_page_config(page_title="Private Session", page_icon="🔞", layout="centered")
 
 # --- UI & MUSIC SETUP ---
 def add_bg_music():
-    # Using a royalty-free rhythmic/sexy lofi beat
-    music_url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" 
+    # A slow, rhythmic Bollywood-style instrumental/track
+    # Setting volume to 0.1 so it stays very low in the background
+    music_url = "https://www.pagalworld.com.sb/files/download/id/68172" # Instrumental Sample
     st.markdown(f"""
-        <audio autoplay loop inline>
+        <audio id="bg-music" autoplay loop inline>
             <source src="{music_url}" type="audio/mp3">
         </audio>
+        <script>
+            var audio = document.getElementById("bg-music");
+            audio.volume = 0.1; 
+        </script>
         """, unsafe_allow_html=True)
 
 st.markdown("""
     <style>
-    .stApp { background: linear-gradient(135deg, #000000, #1a0005, #33000d); }
+    .stApp { background: linear-gradient(135deg, #120101, #2b0000, #000000); }
     .stButton>button {
-        background: linear-gradient(45deg, #ff0055, #800020);
+        background: linear-gradient(45deg, #d00000, #3a0000);
         color: white;
-        border-radius: 8px;
+        border-radius: 12px;
         height: 4em;
         width: 100%;
-        border: 1px solid #ff4d88;
+        border: 1px solid #ff4d4d;
         font-weight: bold;
-        font-size: 16px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        font-size: 15px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
     }
     .stButton>button:hover {
-        box-shadow: 0px 0px 25px #ff0055;
-        transform: scale(1.02);
-        color: #ffd1df;
+        box-shadow: 0px 0px 15px #ff0000;
+        border: 1px solid #ffffff;
+        color: #ffcccc;
     }
     .message-box {
-        background: rgba(20, 20, 20, 0.85);
+        background: rgba(40, 0, 0, 0.7);
         padding: 20px;
-        border-radius: 12px;
-        border-left: 5px solid #ff0055;
+        border-radius: 15px;
+        border: 1px solid #ff0000;
         text-align: center;
-        color: #ffb3c6;
-        font-size: 19px;
-        margin-bottom: 15px;
-        line-height: 1.4;
+        color: #ff9999;
+        font-size: 20px;
+        margin-bottom: 20px;
+        font-family: 'Courier New', Courier, monospace;
     }
-    h1, h2 { text-shadow: 2px 2px 10px #ff0055; }
+    h1 { text-shadow: 0px 0px 15px #ff0000; color: white !important; }
     </style>
     """, unsafe_allow_html=True)
 
 def play_audio(text, lang):
     try:
+        # Using specific locales for deeper/more masculine 'male-ish' tones
         tts = gTTS(text=text, lang=lang, slow=False)
         fp = io.BytesIO()
         tts.write_to_fp(fp)
         fp.seek(0)
         audio_b64 = base64.b64encode(fp.read()).decode()
+        # Voice is played at full volume (default) while music is at 0.1
         audio_tag = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
         st.markdown(audio_tag, unsafe_allow_html=True)
-    except: st.error("Voice sync failed.")
+    except: st.error("Voice Error")
 
 # --- APP START ---
 add_bg_music()
-st.markdown("<h1 style='text-align: center; color: white;'>Naughty Whispers</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>🥵 Dark Whispers</h1>", unsafe_allow_html=True)
 
-# --- DIRTY RHYMES DATA ---
-# Using 'en-uk' and 'en-au' for masculine-leaning tones where possible
+# --- THE RHYMES ---
 msg_data = {
-    "English 🇬🇧": ("Harder and faster, do as I say. I’m gonna make you crave me all day. Up on the bed, down on the floor. I'll make you scream and beg for more.", "en-uk"),
-    "Telugu 🇮🇳": ("Nee nadumu vonpu, naaku telusu... naa korika teerchu, idi naa varusa. Cheekatilo ninnu gichhi gichhi... pichhi ekkista, ninnu munchi.", "te"),
-    "Urdu 🇵🇰": ("Raat hai jawaan, badan hai nanga... Karunga wo kaam, jo hai danga. Upar niche, har ek pal... Dunga sukoon, aaj aur kal.", "ur"),
-    "Spanish 🇪🇸": ("Te quiero morder, te quiero tocar... En mi cama te voy a castigar. Arriba y abajo, sin descansar... Tus gemidos me van a encantar.", "es"),
-    "Chinese 🇨🇳": ("Wǒ yào nǐ de shēntǐ, wǒ yào nǐ de hǎn... Zài wǒ de kuàngyě lǐ, nǐ bùnéng fǎn. Shàng shàng xià xià, wǒ bù huì tíng... Ràng nǐ de línghún, wèi wǒ ér míng.", "zh-cn"),
-    "Korean 🇰🇷": ("Neo-ui momeul wonhae, nareul bwa... Naega neoreul michige halkkeoya. Wi araero, gyesokhae... Neon nae kkeoya, gajyeobwa.", "ko"),
-    "Hindi 🇮🇳": ("Garmi hai badan mein, maza aayega... Jab mera haath, tere niche jayega. Round and round, hum ghoomenge... Tere honton ko, hum choomenge.", "hi"),
-    "Afghani (Phonetic)": ("Labat teshna, badant garm... Mekonum emshab, khodeta narm. Bala o payin, nako nakhra... Bia pesham, bakhuda.", "en-au") 
+    "English 🇬🇧": ("Harder, deeper, do it again... I'm your master, not your friend. Under the sheets, lose control... I’m gonna take your very soul.", "en-uk"),
+    "Hindi 🇮🇳": ("Raat akeli, badan hai garm... Tod do saari sharam o marm. Upar niche, mere saath... Thamlo kas ke mera haath.", "hi"),
+    "Urdu 🇵🇰": ("Be-sharm nigaahein, garm saansein... Aaj poori hongi sab muraadein. Kapre utaaro, paas aao... Mujhe apni tapan dikhao.", "ur"),
+    "Telugu 🇮🇳": ("Nee vedi naa paina, naa cheyi nee lona... ee raatri manadi, telusa maina? Paiki kindaki, ninnu laaguta... nee tapanani nenu teerusta.", "te"),
+    "Spanish 🇪🇸": ("Pégate a mí, siente el calor... Te voy a dar mucho dolor y amor. Contra la pared, sin ropa ya... Mi cuerpo en el tuyo se quedará.", "es"),
+    "Chinese 🇨🇳": ("Bǎ yīfú tuōguāng, kào jìn wǒ... Wǒ yào kàn nǐ wèi wǒ zhuóhuǒ. Shàng xià lánshān, bùyào tíng... Nǐ de jiàochuán, wǒ de mìng.", "zh-cn"),
+    "Korean 🇰🇷": ("Nae gyeoteuro wa, momeul matgyeo... Neo-ui han sum-eul naega gajyeo. Wi araero, deo sege... Oneul bam neon nae kkeoya.", "ko"),
+    "Afghani (Dari)": ("Bia pesham, naza nako... Badanat ra garm o taza nako. Bala o payin, dar khedmat... Mekonum emshab, ba lezat.", "hi") # Using Hindi engine for similar phonetics
 }
 
 # --- 2-COLUMN GRID ---
 keys = list(msg_data.keys())
 for i in range(0, len(keys), 2):
     col1, col2 = st.columns(2)
-    
-    # Language 1
     with col1:
-        lang1 = keys[i]
-        txt1, code1 = msg_data[lang1]
-        if st.button(lang1):
-            st.session_state['active_msg'] = txt1
-            play_audio(txt1, code1)
-            
-    # Language 2
+        l1 = keys[i]
+        if st.button(l1):
+            st.session_state['msg'] = msg_data[l1][0]
+            play_audio(msg_data[l1][0], msg_data[l1][1])
     with col2:
         if i + 1 < len(keys):
-            lang2 = keys[i+1]
-            txt2, code2 = msg_data[lang2]
-            if st.button(lang2):
-                st.session_state['active_msg'] = txt2
-                play_audio(txt2, code2)
+            l2 = keys[i+1]
+            if st.button(l2):
+                st.session_state['msg'] = msg_data[l2][0]
+                play_audio(msg_data[l2][0], msg_data[l2][1])
 
-# --- MESSAGE DISPLAY ---
-if 'active_msg' in st.session_state:
-    st.markdown(f'<div class="message-box">{st.session_state["active_msg"]}</div>', unsafe_allow_html=True)
+# --- MESSAGE BOX ---
+if 'msg' in st.session_state:
+    st.markdown(f'<div class="message-box">{st.session_state["msg"]}</div>', unsafe_allow_html=True)
 
-st.markdown("<br><hr style='border-color: #33000d;'>", unsafe_allow_html=True)
+st.markdown("<br><hr style='border-color: #550000;'>", unsafe_allow_html=True)
 
-if st.button("TAKE ME NOW 🔥"):
-    st.balloons()
-    st.markdown("<h2 style='text-align: center; color: #ff0055;'>Good girl. Wait for me.</h2>", unsafe_allow_html=True)
+if st.button("MAKE ME MOAN 💦"):
+    st.snow()
+    st.write("<h3 style='text-align: center; color: white;'>Lock the door. I'm almost there.</h3>", unsafe_allow_html=True)
