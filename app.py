@@ -3,6 +3,7 @@ import streamlit_confetti as confetti
 import time
 import random
 from typing import List, Tuple, Optional
+import copy
 
 # Color palette
 COLORS = {
@@ -44,26 +45,16 @@ ST_CSS = f"""
         padding: 0.8rem 1.5rem;
         box-shadow: 0 4px 15px rgba(139,0,0,0.4);
         transition: all 0.3s ease;
+        height: 120px;
+        width: 120px;
     }}
     .stButton > button:hover {{
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(139,0,0,0.6);
     }}
-    .cell {{
-        width: 120px !important;
-        height: 120px !important;
-        font-size: 3rem !important;
-        font-weight: bold !important;
-        background: rgba(255,255,255,0.1) !important;
-        border: 3px solid {COLORS['gold']} !important;
-        border-radius: 15px !important;
-        color: {COLORS['gold']} !important;
-        transition: all 0.3s ease !important;
-        backdrop-filter: blur(10px);
-    }}
-    .cell:hover {{
-        background: rgba(255,192,203,0.3) !important;
-        transform: scale(1.05);
+    .stButton > button:disabled {{
+        opacity: 0.7;
+        cursor: not-allowed;
     }}
     .toast {{
         background: linear-gradient(45deg, {COLORS['rose']}, {COLORS['gold']});
@@ -73,6 +64,7 @@ ST_CSS = f"""
         font-weight: bold;
         box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         margin: 1rem 0;
+        text-align: center;
     }}
 </style>
 """
@@ -84,11 +76,15 @@ class TicTacToe:
         self.game_over = False
         self.winner = None
         
+    def reset(self):
+        self.__init__()
+    
     def make_move(self, row: int, col: int, player: str) -> bool:
         """Make a move if valid"""
-        if self.board[row][col] == '' and not self.game_over:
+        if 0 <= row < 3 and 0 <= col < 3 and self.board[row][col] == '' and not self.game_over:
             self.board[row][col] = player
             self.current_player = 'O' if player == 'X' else 'X'
+            self.game_over = bool(self.check_winner())
             return True
         return False
     
@@ -101,7 +97,7 @@ class TicTacToe:
         
         # Columns
         for col in range(3):
-            if (self.board[0][col] == self.board[1][col] == self.board[2][col] != ''):
+            if self.board[0][col] == self.board[1][col] == self.board[2][col] != '':
                 return self.board[0][col]
         
         # Diagonals
@@ -115,42 +111,34 @@ class TicTacToe:
             return 'draw'
         
         return None
-    
-    def is_board_full(self) -> bool:
-        return all(cell != '' for row in self.board for cell in row)
-    
-    def get_empty_positions(self) -> List[Tuple[int, int]]:
-        return [(i, j) for i in range(3) for j in range(3) if self.board[i][j] == '']
 
 def minimax(board: List[List[str]], is_maximizing: bool, game: TicTacToe) -> int:
-    """Minimax algorithm with alpha-beta pruning for unbeatable AI"""
+    """Minimax algorithm - corrected to avoid deep recursion issues"""
     winner = game.check_winner()
     
     if winner == 'O':  # AI wins
-        return 10
+        return 10 - len([cell for row in board for cell in row if cell != ''])
     elif winner == 'X':  # User wins
-        return -10
+        return -10 + len([cell for row in board for cell in row if cell != ''])
     elif winner == 'draw':
         return 0
     
     if is_maximizing:  # AI's turn (O)
         max_eval = -float('inf')
-        for row, col in game.get_empty_positions():
-            temp_board = [row[:] for row in board]
-            temp_board[row][col] = 'O'
-            temp_game = TicTacToe()
-            temp_game.board = temp_board
-            eval_score = minimax(temp_board, False, temp_game)
+        empty_positions = [(i, j) for i in range(3) for j in range(3) if board[i][j] == '']
+        for row, col in empty_positions:
+            board[row][col] = 'O'
+            eval_score = minimax(board, False, game)
+            board[row][col] = ''  # Undo move
             max_eval = max(max_eval, eval_score)
         return max_eval
     else:  # User's turn (X)
         min_eval = float('inf')
-        for row, col in game.get_empty_positions():
-            temp_board = [row[:] for row in board]
-            temp_board[row][col] = 'X'
-            temp_game = TicTacToe()
-            temp_game.board = temp_board
-            eval_score = minimax(temp_board, True, temp_game)
+        empty_positions = [(i, j) for i in range(3) for j in range(3) if board[i][j] == '']
+        for row, col in empty_positions:
+            board[row][col] = 'X'
+            eval_score = minimax(board, True, game)
+            board[row][col] = ''  # Undo move
             min_eval = min(min_eval, eval_score)
         return min_eval
 
@@ -158,14 +146,14 @@ def get_best_move(game: TicTacToe) -> Optional[Tuple[int, int]]:
     """Find the best move for AI using minimax"""
     best_score = -float('inf')
     best_move = None
+    game_copy = copy.deepcopy(game)
     
-    for row, col in game.get_empty_positions():
-        temp_board = [row[:] for row in game.board]
-        temp_board[row][col] = 'O'
-        temp_game = TicTacToe()
-        temp_game.board = temp_board
-        
-        move_score = minimax(temp_board, False, temp_game)
+    empty_positions = [(i, j) for i in range(3) for j in range(3) if game.board[i][j] == '']
+    for row, col in empty_positions:
+        # Simulate move
+        game_copy.board[row][col] = 'O'
+        move_score = minimax(game_copy.board, False, game_copy)
+        game_copy.board[row][col] = ''  # Undo
         
         if move_score > best_score:
             best_score = move_score
@@ -174,7 +162,7 @@ def get_best_move(game: TicTacToe) -> Optional[Tuple[int, int]]:
     return best_move
 
 # Valentine messages
-WELCOME_MESSAGE = "💕 **Think you can beat me?** 💕"
+WELCOME_MESSAGE = "💕 **Think you can beat me?** 💕
 
 If you lose, the stakes are *high*... Play as **X**, I'll be **O**. Make your move!"
 TOASTS = [
@@ -194,7 +182,6 @@ and surprise me with a **wonderful gift**.
 **No excuses!** 💃✨
 """
 
-# Streamlit app
 def main():
     st.set_page_config(
         page_title="❤️ Valentine's Tic-Tac-Toe Challenge ❤️",
@@ -204,27 +191,25 @@ def main():
     
     st.markdown(ST_CSS, unsafe_allow_html=True)
     
-    # State management
-    if 'game' not in st.session_state:
+    # Initialize session state properly
+    if 'initialized' not in st.session_state:
         st.session_state.game = TicTacToe()
-    if 'screen' not in st.session_state:
         st.session_state.screen = 'welcome'
-    if 'toast' not in st.session_state:
         st.session_state.toast = ""
+        st.session_state.initialized = True
     
     game = st.session_state.game
     
-    # Main container
-    container = st.container()
-    
+    # Main layout
     if st.session_state.screen == 'welcome':
-        welcome_screen(container, game)
+        welcome_screen(game)
     elif st.session_state.screen == 'playing':
-        game_screen(container, game)
+        game_screen(game)
     elif st.session_state.screen == 'game_over':
-        game_over_screen(container, game)
+        game_over_screen(game)
 
-def welcome_screen(container, game):
+@st.cache_data
+def welcome_screen(_game):
     st.markdown("""
     <div style='text-align: center; padding: 3rem 0;'>
         <h1 style='font-size: 3.5rem; margin-bottom: 1rem;'>💕 TIC-TAC-TOE CHALLENGE 💕</h1>
@@ -242,76 +227,65 @@ def welcome_screen(container, game):
             st.session_state.screen = 'playing'
             st.rerun()
 
-def game_screen(container, game):
-    # Header with toast
+def game_screen(game: TicTacToe):
+    # Toast message
     if st.session_state.toast:
-        st.markdown(f"""
-        <div class='toast' style='text-align: center;'>
-            {st.session_state.toast}
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="toast">{st.session_state.toast}</div>', unsafe_allow_html=True)
+        st.session_state.toast = ""  # Clear toast
     
     # Game status
-    status_col1, status_col2, status_col3 = st.columns([1, 2, 1])
-    with status_col2:
-        winner = game.check_winner()
-        if winner:
-            st.session_state.screen = 'game_over'
-            st.session_state.game = game
-            st.rerun()
-        elif game.current_player == 'X':
+    winner = game.check_winner()
+    if winner:
+        st.session_state.screen = 'game_over'
+        st.session_state.winner = winner
+        st.rerun()
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if game.current_player == 'X':
             st.metric("Your Turn", "❌ X", delta="Make your move!")
         else:
-            st.metric("My Turn", "⭕ O", delta="Thinking...")
+            st.metric("AI Turn", "⭕ O", delta="Thinking...")
     
-    # Game grid
-    grid_cols = st.columns(3)
-    
+    # Game grid - Fixed button rendering
+    st.markdown("---")
     for i in range(3):
-        with grid_cols[i]:
-            for j in range(3):
+        cols = st.columns(3)
+        for j in range(3):
+            with cols[j]:
                 cell_key = f"cell_{i}_{j}"
                 if game.board[i][j] == '':
-                    if game.current_player == 'X' and st.button('', key=cell_key, help=f'Row {i}, Col {j}'):
-                        if game.make_move(i, j, 'X'):
-                            st.session_state.toast = random.choice(TOASTS)
-                            st.rerun()
+                    if game.current_player == 'X':
+                        if st.button('', key=cell_key):
+                            if game.make_move(i, j, 'X'):
+                                st.session_state.toast = random.choice(TOASTS)
+                                st.rerun()
+                    else:
+                        st.button('', key=f"empty_{i}_{j}", disabled=True)
                 else:
                     st.button(game.board[i][j], key=f"filled_{i}_{j}", disabled=True)
     
-    # AI Move (near-instant)
-    if game.current_player == 'O' and not game.game_over:
-        with st.spinner('AI thinking... 💭'):
-            time.sleep(0.3)  # Quick thinking simulation
-            best_move = get_best_move(game)
-            if best_move:
-                row, col = best_move
-                game.make_move(row, col, 'O')
-                st.rerun()
-    
     # Reset button
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 3, 1])
-    with col2:
-        if st.button("🔄 New Game", use_container_width=True):
-            st.session_state.game = TicTacToe()
-            st.session_state.screen = 'welcome'
-            st.session_state.toast = ""
-            st.rerun()
+    if st.button("🔄 New Game", use_container_width=True):
+        st.session_state.game = TicTacToe()
+        st.session_state.screen = 'welcome'
+        st.session_state.toast = ""
+        st.rerun()
 
-def game_over_screen(container, game):
-    # Trigger confetti
+def game_over_screen(game: TicTacToe):
     confetti.show()
     
-    st.markdown(PENALTY_MESSAGE, unsafe_allow_html=True)
+    if st.session_state.winner == 'O':
+        st.markdown(PENALTY_MESSAGE, unsafe_allow_html=True)
+    else:
+        st.success("🎉 It's a draw! You survived... this time! 💕")
     
-    col1, col2 = st.columns([1, 1])
-    with col2:
-        if st.button("💕 Play Again", use_container_width=True):
-            st.session_state.game = TicTacToe()
-            st.session_state.screen = 'welcome'
-            st.session_state.toast = ""
-            st.rerun()
+    if st.button("💕 Play Again", use_container_width=True):
+        st.session_state.game = TicTacToe()
+        st.session_state.screen = 'welcome'
+        st.session_state.toast = ""
+        st.session_state.winner = None
+        st.rerun()
 
 if __name__ == "__main__":
     main()
