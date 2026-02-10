@@ -3,181 +3,138 @@ import time
 import random
 import math
 
-st.set_page_config(page_title="💔 FAST HEART CHASE 💔", page_icon="❤️", layout="wide")
+st.set_page_config(page_title="💔 10-SEC HEART CHASE 💔", page_icon="❤️", layout="wide")
 
 # Initialize
-if 'game_state' not in st.session_state: st.session_state.game_state = 'playing'
-if 'start_time' not in st.session_state: st.session_state.start_time = time.time()
-if 'time_left' not in st.session_state: st.session_state.time_left = 30
-if 'angle' not in st.session_state: st.session_state.angle = 0
-if 'speed' not in st.session_state: st.session_state.speed = 0.4  # HIGH SPEED!
-if 'center_x' not in st.session_state: st.session_state.center_x = 50
-if 'center_y' not in st.session_state: st.session_state.center_y = 50
-if 'radius' not in st.session_state: st.session_state.radius = 35
-if 'click_count' not in st.session_state: st.session_state.click_count = 0
+if 'game_state' not in st.session_state: st.session_state.game_state = 'start'
+if 'start_time' not in st.session_state: st.session_state.start_time = 0
+if 'time_left' not in st.session_state: st.session_state.time_left = 10
+if 'heart_x' not in st.session_state: st.session_state.heart_x = 50
+if 'heart_y' not in st.session_state: st.session_state.heart_y = 50
+if 'caught' not in st.session_state: st.session_state.caught = False
 
-# FIXED FRAME - NO SCROLL CSS
+# FIXED NO-SCROLL FRAME
 st.markdown("""
 <style>
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-}
-.main {
-    padding: 0 !important;
-    background: linear-gradient(135deg, #ff1744, #ff6b9d, #ff9ff3) !important;
-    margin: 0 !important;
+html, body { margin: 0; padding: 0; overflow: hidden; height: 100vh; }
+.main { 
+    padding: 0 !important; 
+    background: linear-gradient(135deg, #ff1744, #ff6b9d) !important;
+    height: 100vh !important;
 }
 .game-frame {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-    background: radial-gradient(circle, #ff69b4 0%, #ff1493 100%);
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+    overflow: hidden; background: radial-gradient(circle, #ff69b4 0%, #ff1493 70%);
 }
-.heart-orbit {
-    position: absolute !important;
-    font-size: 90px !important;
-    pointer-events: none !important;
-    z-index: 9999 !important;
-    text-shadow: 0 0 30px #fff, 0 0 40px #ff1493 !important;
-    filter: drop-shadow(0 0 20px #ff1493);
+.heart-clickable {
+    position: absolute; font-size: 80px; 
+    cursor: pointer; z-index: 9999;
+    text-shadow: 0 0 25px #fff, 0 0 35px #ff1493;
+    transition: all 0.1s ease; /* FAST JUMP */
+    animation: heartbeat 0.4s infinite;
 }
-@keyframes superpulse {
-    0% { transform: scale(1) rotate(0deg); }
-    25% { transform: scale(1.4) rotate(90deg); }
-    50% { transform: scale(1.2) rotate(180deg); }
-    75% { transform: scale(1.5) rotate(270deg); }
-    100% { transform: scale(1) rotate(360deg); }
+.heart-clickable:hover {
+    transform: scale(1.3) !important;
+    filter: brightness(1.3);
 }
-.click-trap {
-    position: absolute !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    opacity: 0 !important;
-    z-index: 10000 !important;
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
 }
 .stats {
-    position: fixed !important;
-    top: 10px !important;
-    left: 10px !important;
-    background: rgba(0,0,0,0.7) !important;
-    color: gold !important;
-    padding: 15px !important;
-    border-radius: 20px !important;
-    font-size: 20px !important;
-    font-weight: bold !important;
-    z-index: 10001 !important;
+    position: fixed; top: 15px; left: 15px; right: 15px;
+    background: rgba(0,0,0,0.8); color: #ffd700; padding: 12px;
+    border-radius: 15px; font-size: 22px; font-weight: bold;
+    text-align: center; z-index: 10000;
+}
+.lose-screen {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.95); color: #ff1493; padding: 40px;
+    border-radius: 25px; text-align: center; font-size: 32px;
+    border: 3px solid gold; z-index: 10001;
+}
+.restart-btn {
+    position: fixed; bottom: 25px; right: 25px;
+    background: linear-gradient(45deg, gold, orange); color: black;
+    padding: 15px 30px; border: none; border-radius: 50px;
+    font-size: 20px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 8px 25px rgba(255,165,0,0.6);
 }
 </style>
 """, unsafe_allow_html=True)
 
-# START MESSAGE OVERLAY
-if st.session_state.game_state == 'playing':
-    elapsed = time.time() - st.session_state.start_time
-    st.session_state.time_left = max(0, 30 - elapsed)
-    st.session_state.angle += st.session_state.speed  # ULTRA FAST!
-    
-    # PERFECT CIRCULAR MOTION - NEVER SKIPS SCREEN
-    heart_x = 50 + 35 * math.cos(st.session_state.angle)  # Fixed center 50,50
-    heart_y = 50 + 35 * math.sin(st.session_state.angle)
-    
-    # FULL SCREEN FRAME
+if st.session_state.game_state == 'start':
     st.markdown('<div class="game-frame">', unsafe_allow_html=True)
     
-    # START MESSAGE (first 3 seconds)
-    if elapsed < 3:
-        st.markdown("""
-        <div style='
-            position: fixed; 
-            top: 50%; left: 50%; 
-            transform: translate(-50%, -50%);
-            font-size: 48px; 
-            color: gold; 
-            text-shadow: 0 0 30px #ff1493;
-            z-index: 10002;
-            animation: glow 1s infinite;
-        '>
-            🏃‍♂️ **CATCH THE HEART!** 🏃‍♂️
-        </div>
-        <style>
-        @keyframes glow { 0%, 100% { text-shadow: 0 0 20px gold; } 50% { text-shadow: 0 0 40px #ff1493; } }
-        </style>
-        """, unsafe_allow_html=True)
-    
-    # LIVE STATS
-    st.markdown(f"""
-    <div class="stats">
-        ⏰ {st.session_state.time_left:.1f}s | 
-        🖱️ {st.session_state.click_count} | 
-        ⚡ {int(st.session_state.angle*180/math.pi)%360}°
+    # START SCREEN
+    st.markdown("""
+    <div style='position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        font-size: 48px; color: gold; text-align: center; text-shadow: 0 0 30px #ff1493;'>
+        💖 **10 SECONDS TO CATCH THE HEART!** 💖<br>
+        <span style='font-size: 24px; color: white;'>Click the moving heart exactly!</span>
     </div>
     """, unsafe_allow_html=True)
     
-    # FAST REVOLVING HEART
+    if st.button("🚀 **START CHASE** 🚀", key="start_btn"):
+        st.session_state.game_state = 'playing'
+        st.session_state.start_time = time.time()
+        st.session_state.time_left = 10
+        st.session_state.heart_x = random.randint(10, 90)
+        st.session_state.heart_y = random.randint(10, 90)
+        st.session_state.caught = False
+        st.rerun()
+
+elif st.session_state.game_state == 'playing':
+    # TIMER
+    elapsed = time.time() - st.session_state.start_time
+    st.session_state.time_left = max(0, 10 - elapsed)
+    
+    st.markdown('<div class="game-frame">', unsafe_allow_html=True)
+    
+    # LIVE TIMER DISPLAY
     st.markdown(f"""
-    <div class="heart-orbit" 
-         style="left: {heart_x}%; top: {heart_y}%; animation: superpulse 0.3s infinite;">
+    <div class="stats">
+        ⏰ **{st.session_state.time_left:.1f}s LEFT** ⏰
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # CLICKABLE MOVING HEART
+    heart_style = f"""
+    <div class="heart-clickable" 
+         style="left: {st.session_state.heart_x}%; top: {st.session_state.heart_y}%;
+         transition-duration: 0.05s;" 
+         onclick="parent.document.querySelector('#heart_click_trigger').click()">
         💖
     </div>
     """, unsafe_allow_html=True)
     
-    # INVISIBLE FULLSCREEN CLICK DETECTOR
-    if st.button("", key="click_trap", help=""):
-        st.session_state.click_count += 1
-        st.session_state.speed += 0.05  # GETS FASTER WITH CLICKS!
-        st.info("💥 HEART SCARED! SPEED INCREASED!")
+    st.markdown(heart_style)
+    
+    # HIDDEN HEART CLICK TRIGGER
+    if st.button("HEART CLICKED!", key="heart_click_trigger", help=""):
+        # ULTRA FAST POSITION CHANGE
+        st.session_state.heart_x = random.randint(5, 95)
+        st.session_state.heart_y = random.randint(5, 95)
+        st.success("💥 HEART JUMPED! Try again!")
+        st.balloons()
         st.rerun()
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # TIME UP
+    # TIME UP - LOSER!
     if st.session_state.time_left <= 0:
         st.session_state.game_state = 'lost'
+        st.markdown("""
+        <div class="lose-screen">
+            💔 **LOSER! TIME UP!** 💔<br><br>
+            <span style='color: gold; font-size: 28px;'>Heart escaped your grasp! 😭</span>
+        </div>
+        """, unsafe_allow_html=True)
         st.rerun()
 
-elif st.session_state.game_state == 'lost':
-    st.markdown("""
-    <div style='
-        position: fixed; 
-        top: 50%; left: 50%; 
-        transform: translate(-50%, -50%);
-        background: rgba(0,0,0,0.9);
-        color: #ff1493;
-        padding: 40px;
-        border-radius: 25px;
-        text-align: center;
-        font-size: 28px;
-        z-index: 10002;
-    '>
-        💔 **TIME UP!** 💔<br>
-        <span style='color: gold; font-size: 36px;'>Final: {st.session_state.click_count} scares!</span>
-    </div>
-    """, unsafe_allow_html=True)
-
-# RESTART (bottom corner)
+# RESTART BUTTON (always visible)
 st.markdown("""
-<div style='
-    position: fixed; 
-    bottom: 20px; right: 20px; 
-    z-index: 10003;
-'>
-    <button onclick="window.location.reload()" 
-            style="
-                background: linear-gradient(45deg, gold, #ff1493);
-                color: black; 
-                padding: 15px 25px; 
-                border: none; 
-                border-radius: 50px; 
-                font-size: 20px; 
-                font-weight: bold;
-                cursor: pointer;
-                box-shadow: 0 10px 30px rgba(255,20,147,0.5);
-            ">
-        🔄 NEW GAME
-    </button>
+<div class="restart-btn" onclick="window.location.reload()">
+    🔄 **NEW GAME**
 </div>
 """, unsafe_allow_html=True)
