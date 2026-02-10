@@ -1,102 +1,102 @@
 import streamlit as st
+import time
 
-st.set_page_config(page_title="Valentine Love Quiz", page_icon="💕")
+st.set_page_config(page_title="🔥 दिल का क्लिकर धमाका 🔥", page_icon="❤️")
 
-# Valentine's questions (romantic facts/trivia)
-questions = [
-    {
-        "question": "What is the traditional birth flower for Valentine's Day?",
-        "choices": ["Rose", "Lily", "Tulip", "Daisy"],
-        "answer": "Rose"
-    },
-    {
-        "question": "In what year was the first Valentine's Day card sent?",
-        "choices": ["1840s", "1700s", "1900s", "Ancient Rome"],
-        "answer": "1840s"
-    },
-    {
-        "question": "What do the 'X' and 'O' in 'XOXO' represent?",
-        "choices": ["Hugs and kisses", "Kisses and hugs", "Love and luck", "Forever and always"],
-        "answer": "Kisses and hugs"
-    },
-    {
-        "question": "Which famous queen received 22,000 love letters?",
-        "choices": ["Queen Victoria", "Cleopatra", "Marie Antoinette", "Queen Elizabeth"],
-        "answer": "Queen Victoria"
-    },
-    {
-        "question": "What color roses mean 'love at first sight'?",
-        "choices": ["Red", "Pink", "White", "Lavender"],
-        "answer": "Lavender"
-    }
-]
-
-# Initialize session state
-if 'current_question' not in st.session_state:
-    st.session_state.current_question = 0
-if 'score' not in st.session_state:
-    st.session_state.score = 0
-if 'quiz_completed' not in st.session_state:
-    st.session_state.quiz_completed = False
-if 'game_key' not in st.session_state:
-    st.session_state.game_key = 0
+# Initialize
+if 'hearts' not in st.session_state: st.session_state.hearts = 0
+if 'rupees' not in st.session_state: st.session_state.rupees = 0
+if 'cps' not in st.session_state: st.session_state.cps = 0
+if 'upgrades' not in st.session_state:
+    st.session_state.upgrades = {'bhabhi': 0, 'padosan': 0, 'sautan': 0, 'desi_cupid': 0}
+if 'last_time' not in st.session_state: st.session_state.last_time = time.time()
 
 st.markdown("""
-    <style>
-    .main {background-color: #ffebff;}
-    .stButton > button {background-color: #ff69b4; color: white;}
-    </style>
+<style>
+.main {background: linear-gradient(45deg, #ff4444, #ffaa00, #ff4444);}
+.stButton > button {background: #d63384; color: gold; font-weight: bold; font-size: 24px; border: 3px solid gold;}
+h1 {color: #ff1493; text-shadow: 2px 2px gold;}
+.metric {font-size: 2.5em; color: #ff69b4;}
+</style>
 """, unsafe_allow_html=True)
 
-## Game Play
-st.title("💕 Valentine Love Match Quiz 💕")
-st.markdown("Answer 5 romantic trivia questions to see how much you know about love! Each correct answer earns a heart. ❤️")
+## 🔥 MAIN DHAMAKA SCREEN 🔥
+st.markdown("## 😂🔥 **DIL KA CLICKER DHAMAKA** 🔥😂")
+st.markdown("**भाई click करो ये दिल तोड़ो! 💔 प्यार के रुपये कमाओ! हर upgrade में desi comedy!** 🎭")
 
-if not st.session_state.quiz_completed:
-    # New game button
-    if st.button("🔄 New Quiz", key="new_quiz"):
-        st.session_state.current_question = 0
-        st.session_state.score = 0
-        st.session_state.quiz_completed = False
-        st.session_state.game_key += 1
-        st.rerun()
+col1, col2, col3 = st.columns(3)
+with col1: st.metric("💔 दिल टूटे", f"{int(st.session_state.hearts):,}")
+with col2: st.metric("💰 रुपये/sec", st.session_state.cps)
+with col3: st.metric("😂 मसाला लेवल", sum(st.session_state.upgrades.values()))
 
-    current_q = questions[st.session_state.current_question]
-    st.subheader(f"Question {st.session_state.current_question + 1}/5")
-    st.write(current_q["question"])
+# GIANT HEART BUTTON
+if st.button("💔 **DIL TOD DO BHAI!** 💔", use_container_width=True):
+    bonus = 1 + st.session_state.upgrades['bhabhi'] * 2
+    st.session_state.hearts += bonus
+    st.session_state.rupees += bonus * 0.1
+    st.balloons()
+    st.session_state.last_time = time.time()
+    st.rerun()
 
-    # Radio choices
-    choice = st.radio("Your answer:", current_q["choices"], key=f"q_{st.session_state.current_question}_{st.session_state.game_key}")
+# Auto rupees
+delta = time.time() - st.session_state.last_time
+st.session_state.hearts += st.session_state.cps * delta * 0.1
+st.session_state.rupees += st.session_state.cps * delta
+st.session_state.last_time = time.time()
 
-    if st.button("❤️ Submit Answer"):
-        if choice == current_q["answer"]:
-            st.session_state.score += 1
-            st.success("Correct! 💖")
-            st.balloons()
-        else:
-            st.error(f"Oops! The answer was **{current_q['answer']}** 💔")
+## 🎭 DESI GAALI JOKES
+jokes = [
+    "तेरी भाभी ने like ठोका! 😂 +5 hearts",
+    "पड़ोसन ने आँख मार दी! 😏 रुपये double!",
+    "सौतन जल गयी! 🔥 Free boost भाई!",
+    "कुत्ते ने दिल चुरा लिया! 🐕💔 हाहाहा!",
+    "मम्मी ने पकड़ लिया! 😱 Game over almost!",
+    "Cupid ने thappad मार दिया! 💥 +100 hearts"
+]
+if st.session_state.hearts > 10:
+    st.error(f"**{jokes[int(st.session_state.hearts/50) % len(jokes)]}**")
 
-        # Next question or end
-        if st.session_state.current_question < len(questions) - 1:
-            st.session_state.current_question += 1
-        else:
-            st.session_state.quiz_completed = True
-        st.rerun()
-else:
-    # Results
-    percentage = (st.session_state.score / len(questions)) * 100
-    hearts = "❤️" * st.session_state.score
-    st.markdown(f"## Quiz Complete! Your Love Score: **{st.session_state.score}/5** {hearts}")
-    if percentage >= 80:
-        st.success("You're a love expert! 🎉💑")
-    elif percentage >= 60:
-        st.info("Sweetheart level! 😘")
-    else:
-        st.warning("Room to grow in romance... Try again! 🌹")
-    
-    if st.button("🔄 Play Again"):
-        st.session_state.current_question = 0
-        st.session_state.score = 0
-        st.session_state.quiz_completed = False
-        st.session_state.game_key += 1
-        st.rerun()
+## 🛒 DESI UPGRADES SHOP 🛒
+st.markdown("---")
+st.subheader("🛍️ **DESI UPGRADE DHABA** 🛍️")
+
+upgrades = [
+    {'name': '👩‍🦰 भाभी का झटका', 'cost': 15, 'cps': 0.2, 'key': 'bhabhi', 'emoji': '😍🔥'},
+    {'name': '😘 पड़ोसन पावर', 'cost': 75, 'cps': 1, 'key': 'padosan', 'emoji': '😏💋'},
+    {'name': '😡 सौतन का जलन', 'cost': 300, 'cps': 5, 'key': 'sautan', 'emoji': '🔥💥'},
+    {'name': '🏹 देसी कपिड धमाल', 'cost': 1000, 'cps': 20, 'key': 'desi_cupid', 'emoji': '💘🚀'}
+]
+
+for up in upgrades:
+    col1, col2 = st.columns([3,1])
+    with col1:
+        st.markdown(f"**{up['emoji']} {up['name']}** (x{st.session_state.upgrades[up['key']]})")
+    with col2:
+        if st.button(f"₹{up['cost']}", key=f"buy_{up['key']}"):
+            if st.session_state.rupees >= up['cost']:
+                st.session_state.rupees -= up['cost']
+                st.session_state.upgrades[up['key']] += 1
+                st.session_state.cps += up['cps']
+                st.snow() if 'पड़ोसन' in up['name'] else st.balloons()
+                st.success(f"{up['name']} खरीद ली भाई! अब कमाई होगी!")
+                st.rerun()
+            else:
+                st.error("**पैसे कम हैं भाई! और click करो!** 😭")
+
+# RESET
+if st.button("🔄 **नया धमाल शुरू करो**", key="reset"):
+    for key in st.session_state:
+        if key not in ['last_time']:
+            st.session_state[key] = 0 if isinstance(st.session_state[key], int) else {}
+    st.rerun()
+
+# VICTORY
+if st.session_state.hearts >= 5000:
+    st.markdown("""
+    <div style='text-align:center; background:gold; padding:20px; border-radius:15px;'>
+    <h1>🎉 **TRUE INDIAN LOVE BOSS** 🎉</h1>
+    <h2>5000+ दिल तोड़े! पूरा मोहल्ला जल गया! 🔥😂</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    st.balloons()
+    st.snow()
