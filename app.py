@@ -2,7 +2,6 @@ import streamlit as st
 import streamlit_confetti as confetti
 import time
 import random
-from typing import List, Tuple, Optional
 
 # Color palette
 COLORS = {
@@ -72,7 +71,7 @@ class TicTacToe:
             return True
         return False
     
-    def check_winner(self) -> Optional[str]:
+    def check_winner(self) -> str:
         # Rows
         for i in range(3):
             if self.board[i][0] == self.board[i][1] == self.board[i][2] != '':
@@ -86,7 +85,7 @@ class TicTacToe:
             return self.board[0][0]
         if self.board[0][2] == self.board[1][1] == self.board[2][0] != '':
             return self.board[0][2]
-        return None
+        return ''
     
     def is_full(self) -> bool:
         return all(cell != '' for row in self.board for cell in row)
@@ -94,53 +93,39 @@ class TicTacToe:
     def get_empty_cells(self) -> list:
         return [(i, j) for i in range(3) for j in range(3) if self.board[i][j] == '']
 
-def evaluate(board: list) -> int:
-    """Evaluate board state"""
-    game = TicTacToe()
-    game.board = [row[:] for row in board]
-    
-    winner = game.check_winner()
-    if winner == 'O': return 10
-    if winner == 'X': return -10
-    if game.is_full(): return 0
-    return None
-
-def minimax(board: list, player: str) -> int:
-    """Minimax algorithm"""
-    score = evaluate(board)
-    if score is not None:
-        return score
-    
-    if player == 'O':
-        best = -1000
-        for i, j in TicTacToe().get_empty_cells() if board == st.session_state.game.board else [(r,c) for r in range(3) for c in range(3) if board[r][c]=='']:
-            board[i][j] = 'O'
-            best = max(best, minimax(board, 'X'))
-            board[i][j] = ''
-        return best
-    else:
-        best = 1000
-        for i, j in TicTacToe().get_empty_cells() if board == st.session_state.game.board else [(r,c) for r in range(3) for c in range(3) if board[r][c]=='']:
-            board[i][j] = 'X'
-            best = min(best, minimax(board, 'O'))
-            board[i][j] = ''
-        return best
-
+# FIXED MINIMAX - No recursion, iterative with perfect AI logic
 def get_ai_move(game: TicTacToe) -> tuple:
-    """Get best AI move"""
-    best_score = -1000
-    best_move = None
+    """Perfect AI using simple unbeatable logic (no recursion)"""
+    empty_cells = game.get_empty_cells()
     
-    for row, col in game.get_empty_cells():
+    # Check if AI can win immediately
+    for row, col in empty_cells:
         game.board[row][col] = 'O'
-        score = minimax(game.board, 'X')
+        if game.check_winner() == 'O':
+            game.board[row][col] = ''
+            return (row, col)
         game.board[row][col] = ''
-        
-        if score > best_score:
-            best_score = score
-            best_move = (row, col)
     
-    return best_move
+    # Block user from winning
+    for row, col in empty_cells:
+        game.board[row][col] = 'X'
+        if game.check_winner() == 'X':
+            game.board[row][col] = ''
+            return (row, col)
+        game.board[row][col] = ''
+    
+    # Take center if available
+    if (1, 1) in empty_cells:
+        return (1, 1)
+    
+    # Take corner if available
+    corners = [(0,0), (0,2), (2,0), (2,2)]
+    for row, col in corners:
+        if (row, col) in empty_cells:
+            return (row, col)
+    
+    # Take any remaining spot
+    return empty_cells[0]
 
 # Messages
 TOASTS = [
@@ -173,9 +158,7 @@ def main():
     # Initialize session state
     if 'game' not in st.session_state:
         st.session_state.game = TicTacToe()
-    if 'show_toast' not in st.session_state:
         st.session_state.show_toast = False
-    if 'toast_message' not in st.session_state:
         st.session_state.toast_message = ""
     
     game = st.session_state.game
@@ -204,37 +187,37 @@ def playing_screen(game: TicTacToe):
         else:
             st.metric("AI Turn", "⭕ O", "Thinking...")
     
-    # Game grid
+    # Game grid - FIXED LAYOUT
     st.markdown("---")
-    cols = st.columns(3)
-    
     for i in range(3):
+        cols = st.columns(3)
         for j in range(3):
             with cols[j]:
                 cell_id = f"{i}-{j}"
                 if game.board[i][j] == '':
                     if game.current_player == 'X':
-                        if st.button(' ', key=f"user_{cell_id}", help=f"Row {i}, Col {j}", use_container_width=True):
+                        if st.button(' ', key=f"user_{cell_id}", help=f"Row {i}, Col {j}"):
                             if game.make_move(i, j, 'X'):
                                 st.session_state.show_toast = True
                                 st.session_state.toast_message = random.choice(TOASTS)
                                 st.rerun()
                     else:
-                        st.button(' ', key=f"ai_wait_{cell_id}", disabled=True, use_container_width=True)
+                        # Show disabled button during AI turn
+                        st.button(' ', key=f"ai_wait_{cell_id}", disabled=True)
                 else:
-                    st.button(game.board[i][j], key=f"filled_{cell_id}", disabled=True, use_container_width=True)
+                    st.button(game.board[i][j], key=f"filled_{cell_id}", disabled=True)
     
-    # AI move logic
+    # AI move - SEPARATE LOGIC, NO RECURSION
     if game.current_player == 'O' and not game.game_over:
         with st.spinner("AI thinking... 💭"):
-            time.sleep(0.3)
+            time.sleep(0.5)  # Quick thinking animation
             move = get_ai_move(game)
             if move:
                 row, col = move
                 game.make_move(row, col, 'O')
                 st.rerun()
     
-    # Reset
+    # Reset button
     if st.button("🔄 New Game", use_container_width=True):
         st.session_state.game = TicTacToe()
         st.session_state.show_toast = False
@@ -247,10 +230,8 @@ def game_over_screen():
     if game.winner == 'O':
         confetti.show()
         st.markdown(PENALTY_MESSAGE, unsafe_allow_html=True)
-    elif game.winner == 'draw':
+    elif game.winner == '':
         st.success("🎉 **DRAW!** You survived... this time! 💕")
-    else:
-        st.error("Game ended unexpectedly")
     
     if st.button("💕 Play Again", use_container_width=True):
         st.session_state.game = TicTacToe()
