@@ -1,12 +1,10 @@
 import streamlit as st
-from streamlit_lottie import st_lottie
-import requests
 from gtts import gTTS
 import base64
 import io
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="Bitch I'm a Cow", page_icon="🐄", layout="centered")
+st.set_page_config(page_title="I F*cking Love You", page_icon="🐬", layout="centered")
 
 # --- BACKGROUND & MUSIC SETUP ---
 def setup_environment():
@@ -18,48 +16,46 @@ def setup_environment():
         #bg-video {{
             position: fixed; right: 0; bottom: 0;
             min-width: 100%; min-height: 100%;
-            z-index: -1; filter: brightness(30%);
+            z-index: -1; filter: brightness(25%);
         }}
         .stApp {{ background: rgba(0,0,0,0); }}
         
         .lyrics-container {{
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
-            color: #f8f9fa;
-            font-style: italic;
-            border: 1px dashed #ff0055;
-            margin-bottom: 30px;
+            color: #00f2ff;
+            font-size: 14px;
+            border: 1px solid #ff0055;
+            margin-bottom: 20px;
         }}
 
         .stButton>button {{
             color: white;
-            border-radius: 50px;
-            height: 3.5em;
+            border-radius: 8px;
+            height: 3em;
             width: 100%;
             font-weight: bold;
-            transition: 0.4s;
+            font-size: 12px;
             border: none;
+            margin-bottom: 5px;
         }}
-        /* Dirty Vocal Button Style */
-        div[data-testid="stVerticalBlock"] > div:nth-child(2) button {{
-            background: linear-gradient(45deg, #ff0055, #4a00e0);
-        }}
-        /* Localized Song Button Style */
-        div[data-testid="stVerticalBlock"] > div:nth-child(3) button {{
-            background: linear-gradient(45deg, #00dbde, #2193b0);
-        }}
+        /* Dirty Vocal */
+        div[data-testid="stVerticalBlock"] button[key^="d_"] {{ background: linear-gradient(45deg, #ff0055, #800020); }}
+        /* Mooo! */
+        div[data-testid="stVerticalBlock"] button[key^="s_"] {{ background: linear-gradient(45deg, #00dbde, #2193b0); }}
+        /* IFLY */
+        div[data-testid="stVerticalBlock"] button[key^="i_"] {{ background: linear-gradient(45deg, #fceabb, #f8b500); color: black; }}
         
         .message-box {{
             background: rgba(0, 0, 0, 0.9);
             padding: 20px;
             border-radius: 15px;
-            border: 2px solid #00dbde;
+            border: 2px solid #f8b500;
             text-align: center;
-            color: #ff0055;
+            color: #ffffff;
             font-size: 18px;
-            font-weight: bold;
         }}
         </style>
         
@@ -85,96 +81,76 @@ def play_audio(text, lang):
         audio_b64 = base64.b64encode(fp.read()).decode()
         audio_tag = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
         st.markdown(audio_tag, unsafe_allow_html=True)
-    except: st.error("Voice sync failed.")
+    except: st.error("Voice Error")
 
-# --- APP START ---
 setup_environment()
-st.markdown("<h1 style='text-align: center; color: white;'>💦 MOOO-PHIN VIBES 🐬</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: white;'>💦 WET WHISPERS 🐬</h1>", unsafe_allow_html=True)
 
-# --- STATIC LYRICS DISPLAY ---
-st.markdown("""
-<div class="lyrics-container">
-    <p>Bitch, I'm a cow, bitch, I'm a cow</p>
-    <p>I'm not a cat, I don't say mew</p>
-    <p>Bitch, I'm a cow, bitch, I'm a cow</p>
-</div>
-""", unsafe_allow_html=True)
-
-# --- THE DATA (DIRTY & LOCALIZED SONG) ---
+# --- THE DATA ---
 msg_data = {
     "English 🇬🇧": {
+        "code": "en-uk",
         "dirty": "Do you want me? Wanna fuck me? Aaja bby mere naal right now. I wanna lick you raw, make you moan for more.",
-        "song": "Bitch I am a cow, bitch I am a cow. I am not a cat, I do not say mew. Bitch I am a cow.",
-        "code": "en-uk"
+        "song": "Bitch I am a cow, bitch I am a cow. I am not a cat, I do not say mew.",
+        "ifly": "This my baby, this my star. Only thing I want is what you are. Girl, you're so perfect. I f-ing love you."
     },
     "Hindi 🇮🇳": {
+        "code": "hi",
         "dirty": "Aaja bby mere naal right now. Teri choot chatni hai, tujhe pelna hai. Garm kar mujhe, mere lund pe tu maze se reh.",
-        "song": "Kutti, mein ek gaay hoon. Mein billi nahi hoon, mein mew nahi kehti. Kutti, mein ek gaay hoon.",
-        "code": "hi"
-    },
-    "Urdu 🇵🇰": {
-        "dirty": "Aaja bby mere naal right now. Be-sharm nigaahein, garm saansein. Kapre utaaro, mujhe apni tapan dikhao.",
-        "song": "Kutti, mein ek gaay hoon. Mein billi nahi hoon, mein mew nahi kehti. Kutti, mein ek gaay hoon.",
-        "code": "ur"
+        "song": "Kutti, mein ek gaay hoon. Mein billi nahi hoon, mein mew nahi kehti.",
+        "ifly": "Ye meri jaan hai, ye mera sitara hai. Mujhe sirf tum chahiye. Tum bilkul sahi ho. Main tumse bahut pyaar karta hoon."
     },
     "Telugu 🇮🇳": {
+        "code": "te",
         "dirty": "Aaja bby mere naal right now. Nee rasalu naaku kavali, nee pooku nenu cheekali. Paiki kindaki ninnu dengaali.",
-        "song": "Lanja, nenu oka aavu nu. Nenu pilli ni kaadu, nenu mew ananu. Lanja, nenu oka aavu nu.",
-        "code": "te"
+        "song": "Lanja, nenu oka aavu nu. Nenu pilli ni kaadu, nenu mew ananu.",
+        "ifly": "Idhi naa bangaram, idhi naa nakshatram. Naku nuvvu thappa emi vaddu. Nuvvu chala perfect. Nenu ninnu pichiga premisthunnanu."
     },
     "Spanish 🇪🇸": {
-        "dirty": "¿Me quieres? ¿Quieres follarme? Aaja bby mere naal right now. Quiero lamerte toda y luego follarte.",
         "code": "es",
-        "song": "Perra, soy una vaca. No soy un gato, no digo miau. Perra, soy una vaca."
+        "dirty": "¿Me quieres? ¿Quieres follarme? Aaja bby mere naal right now. Quiero lamerte toda.",
+        "song": "Perra, soy una vaca. No soy un gato, no digo miau.",
+        "ifly": "Esta es mi nena, esta es mi estrella. Solo quiero lo que eres. Eres tan perfecta. Te amo jodidamente."
+    },
+    "Urdu 🇵🇰": {
+        "code": "ur",
+        "dirty": "Aaja bby mere naal right now. Be-sharm nigaahein, garm saansein. Kapre utaaro.",
+        "song": "Kutti, mein ek gaay hoon. Mein billi nahi hoon.",
+        "ifly": "Ye meri jaan hai, ye mera sitara hai. Mujhe sirf tumhari zarurat hai. Tum bilkul mukammal ho. Mujhe tumse mohabbat hai."
     },
     "Korean 🇰🇷": {
-        "dirty": "Nal wonhae? Na-rang seksu-hago sipeo? Aaja bby mere naal right now. Neo-ui momeul halttgo sip-eo.",
         "code": "ko",
-        "song": "Nappeun nyeon, naneun so-ya. Naneun goyang-iga aniya, mew-rago haji ana. Nappeun nyeon, naneun so-ya."
-    },
-    "Chinese 🇨🇳": {
-        "dirty": "Nǐ xiǎng yào wǒ ma? Xiǎng gēn wǒ shàngchuáng ma? Aaja bby mere naal right now. Wǒ yào tiǎn nǐ.",
-        "code": "zh-cn",
-        "song": "Biǎozi, wǒ shì yī tiáo niú. Wǒ bùshì māo, wǒ bù huì miāo miāo jiào. Biǎozi, wǒ shì yī tiáo niú."
-    },
-    "Punjabi 🇮🇳": {
-        "dirty": "Aaja bby mere naal right now now now. Teri garm jawani nu nasha pilada. Tenu nange kar ke maza dikhada.",
-        "code": "hi",
-        "song": "Kuttiye, main ik gaan haan. Main billi nahi haan, main mew nahi kehndi. Kuttiye, main ik gaan haan."
+        "dirty": "Nal wonhae? Na-rang seksu-hago sipeo? Aaja bby mere naal right now.",
+        "song": "Nappeun nyeon, naneun so-ya. Naneun goyang-iga aniya.",
+        "ifly": "Nae sarang, nae byeol. Naega wonhaneun geon neo ppuniya. Neon neomu wanbyeokhae. Jinshimeuro saranghae."
     }
 }
 
-# --- 2-COLUMN GRID ---
+# --- 2-COLUMN GRID WITH 3 BUTTONS EACH ---
 keys = list(msg_data.keys())
 for i in range(0, len(keys), 2):
     col1, col2 = st.columns(2)
     
-    with col1:
-        lang = keys[i]
-        st.write(f"**{lang}**")
-        if st.button(f"Dirty Vocal", key=f"d_{i}"):
-            st.session_state['msg'] = msg_data[lang]['dirty']
-            play_audio(msg_data[lang]['dirty'], msg_data[lang]['code'])
-        if st.button(f"Mooo! (Local)", key=f"s_{i}"):
-            st.session_state['msg'] = msg_data[lang]['song']
-            play_audio(msg_data[lang]['song'], msg_data[lang]['code'])
+    for idx, col in enumerate([col1, col2]):
+        if i + idx < len(keys):
+            lang = keys[i + idx]
+            with col:
+                st.write(f"**{lang}**")
+                if st.button(f"Dirty Vocal", key=f"d_{i+idx}"):
+                    st.session_state['msg'] = msg_data[lang]['dirty']
+                    play_audio(msg_data[lang]['dirty'], msg_data[lang]['code'])
+                if st.button(f"Mooo! (Local)", key=f"s_{i+idx}"):
+                    st.session_state['msg'] = msg_data[lang]['song']
+                    play_audio(msg_data[lang]['song'], msg_data[lang]['code'])
+                if st.button(f"IFLY (Bazzi)", key=f"i_{i+idx}"):
+                    st.session_state['msg'] = msg_data[lang]['ifly']
+                    play_audio(msg_data[lang]['ifly'], msg_data[lang]['code'])
 
-    with col2:
-        if i + 1 < len(keys):
-            lang = keys[i+1]
-            st.write(f"**{lang}**")
-            if st.button(f"Dirty Vocal", key=f"d_{i+1}"):
-                st.session_state['msg'] = msg_data[lang]['dirty']
-                play_audio(msg_data[lang]['dirty'], msg_data[lang]['code'])
-            if st.button(f"Mooo! (Local)", key=f"s_{i+1}"):
-                st.session_state['msg'] = msg_data[lang]['song']
-                play_audio(msg_data[lang]['song'], msg_data[lang]['code'])
-
-# --- MESSAGE DISPLAY ---
+# --- MESSAGE BOX ---
 if 'msg' in st.session_state:
     st.markdown(f'<div class="message-box">{st.session_state["msg"]}</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
-if st.button("READY TO GET DIRTY? 🍼"):
+if st.button("STILL THIRSTY? 🔥"):
     st.balloons()
-    st.write("<h3 style='text-align: center; color: white;'>Check your DMs... let's go.</h3>", unsafe_allow_html=True)
+    st.write("<h3 style='text-align: center; color: white;'>I'm ready for whatever comes next.</h3>", unsafe_allow_html=True)
