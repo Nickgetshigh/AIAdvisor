@@ -10,9 +10,7 @@ st.set_page_config(page_title="Bitch I'm a Cow", page_icon="🐄", layout="cente
 
 # --- BACKGROUND & MUSIC SETUP ---
 def setup_environment():
-    # Background Music (Very Low Bollywood Mix)
     music_url = "https://www.pagalworld.com.sb/files/download/id/68172" 
-    # Video Background (Dolphins)
     video_url = "https://assets.mixkit.co/videos/preview/mixkit-dolphins-swimming-underwater-in-the-ocean-1561-large.mp4"
     
     st.markdown(f"""
@@ -20,11 +18,10 @@ def setup_environment():
         #bg-video {{
             position: fixed; right: 0; bottom: 0;
             min-width: 100%; min-height: 100%;
-            z-index: -1; filter: brightness(30%) sepia(20%);
+            z-index: -1; filter: brightness(30%);
         }}
         .stApp {{ background: rgba(0,0,0,0); }}
         
-        /* Lyrics Styling */
         .lyrics-container {{
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
@@ -45,13 +42,13 @@ def setup_environment():
             transition: 0.4s;
             border: none;
         }}
-        /* Vocal 1 - Dirty */
+        /* Dirty Vocal Button Style */
         div[data-testid="stVerticalBlock"] > div:nth-child(2) button {{
             background: linear-gradient(45deg, #ff0055, #4a00e0);
         }}
-        /* Vocal 2 - Doja Cat */
+        /* Localized Song Button Style */
         div[data-testid="stVerticalBlock"] > div:nth-child(3) button {{
-            background: linear-gradient(45deg, #00dbde, #fc00ff);
+            background: linear-gradient(45deg, #00dbde, #2193b0);
         }}
         
         .message-box {{
@@ -61,7 +58,7 @@ def setup_environment():
             border: 2px solid #00dbde;
             text-align: center;
             color: #ff0055;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
         }}
         </style>
@@ -79,47 +76,72 @@ def setup_environment():
         </script>
         """, unsafe_allow_html=True)
 
-def play_audio(text, lang, is_doja=False):
-    if is_doja:
-        # High-quality clip of Doja Cat - Mooo!
-        doja_url = "https://www.myinstants.com/media/sounds/doja-cat-mooo-official-video.mp3"
-        st.markdown(f'<audio autoplay="true" src="{doja_url}"></audio>', unsafe_allow_html=True)
-    else:
-        try:
-            tts = gTTS(text=text, lang=lang, slow=False)
-            fp = io.BytesIO()
-            tts.write_to_fp(fp)
-            fp.seek(0)
-            audio_b64 = base64.b64encode(fp.read()).decode()
-            audio_tag = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
-            st.markdown(audio_tag, unsafe_allow_html=True)
-        except: st.error("Voice sync failed.")
+def play_audio(text, lang):
+    try:
+        tts = gTTS(text=text, lang=lang, slow=False)
+        fp = io.BytesIO()
+        tts.write_to_fp(fp)
+        fp.seek(0)
+        audio_b64 = base64.b64encode(fp.read()).decode()
+        audio_tag = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
+        st.markdown(audio_tag, unsafe_allow_html=True)
+    except: st.error("Voice sync failed.")
 
 # --- APP START ---
 setup_environment()
-
 st.markdown("<h1 style='text-align: center; color: white;'>💦 MOOO-PHIN VIBES 🐬</h1>", unsafe_allow_html=True)
 
-# --- STATIC LYRICS (FIRST STANZA) ---
+# --- STATIC LYRICS DISPLAY ---
 st.markdown("""
 <div class="lyrics-container">
     <p>Bitch, I'm a cow, bitch, I'm a cow</p>
     <p>I'm not a cat, I don't say mew</p>
     <p>Bitch, I'm a cow, bitch, I'm a cow</p>
-    <p>Bitch, I'm a cow, bitch, I'm a cow</p>
 </div>
 """, unsafe_allow_html=True)
 
-# --- THE DATA ---
+# --- THE DATA (DIRTY & LOCALIZED SONG) ---
 msg_data = {
-    "English 🇬🇧": ("Do you want me? Wanna fuck me? Aaja bby mere naal right now. I wanna lick you raw, make you moan for more, then fuck you hard.", "en-uk"),
-    "Hindi 🇮🇳": ("Aaja bby mere naal right now. Teri choot chatni hai, tujhe pelna hai. Garm kar mujhe, mere lund pe tu maze se reh.", "hi"),
-    "Urdu 🇵🇰": ("Aaja bby mere naal right now. Be-sharm nigaahein, garm saansein. Kapre utaaro, mujhe apni tapan dikhao.", "ur"),
-    "Telugu 🇮🇳": ("Aaja bby mere naal right now now now. Nee rasalu naaku kavali, nee pooku nenu cheekali. Paiki kindaki ninnu dengaali.", "te"),
-    "Spanish 🇪🇸": ("¿Me quieres? ¿Quieres follarme? Aaja bby mere naal right now. Quiero lamerte toda y luego follarte.", "es"),
-    "Korean 🇰🇷": ("Nal wonhae? Na-rang seksu-hago sipeo? Aaja bby mere naal right now. Neo-ui momeul halttgo sip-eo.", "ko"),
-    "Chinese 🇨🇳": ("Nǐ xiǎng yào wǒ ma? Xiǎng gēn wǒ shàngchuáng ma? Aaja bby mere naal right now. Wǒ yào tiǎn nǐ.", "zh-cn"),
-    "Punjabi 🇮🇳": ("Aaja bby mere naal right now now now. Teri garm jawani nu nasha pilada. Tenu nange kar ke maza dikhada.", "hi")
+    "English 🇬🇧": {
+        "dirty": "Do you want me? Wanna fuck me? Aaja bby mere naal right now. I wanna lick you raw, make you moan for more.",
+        "song": "Bitch I am a cow, bitch I am a cow. I am not a cat, I do not say mew. Bitch I am a cow.",
+        "code": "en-uk"
+    },
+    "Hindi 🇮🇳": {
+        "dirty": "Aaja bby mere naal right now. Teri choot chatni hai, tujhe pelna hai. Garm kar mujhe, mere lund pe tu maze se reh.",
+        "song": "Kutti, mein ek gaay hoon. Mein billi nahi hoon, mein mew nahi kehti. Kutti, mein ek gaay hoon.",
+        "code": "hi"
+    },
+    "Urdu 🇵🇰": {
+        "dirty": "Aaja bby mere naal right now. Be-sharm nigaahein, garm saansein. Kapre utaaro, mujhe apni tapan dikhao.",
+        "song": "Kutti, mein ek gaay hoon. Mein billi nahi hoon, mein mew nahi kehti. Kutti, mein ek gaay hoon.",
+        "code": "ur"
+    },
+    "Telugu 🇮🇳": {
+        "dirty": "Aaja bby mere naal right now. Nee rasalu naaku kavali, nee pooku nenu cheekali. Paiki kindaki ninnu dengaali.",
+        "song": "Lanja, nenu oka aavu nu. Nenu pilli ni kaadu, nenu mew ananu. Lanja, nenu oka aavu nu.",
+        "code": "te"
+    },
+    "Spanish 🇪🇸": {
+        "dirty": "¿Me quieres? ¿Quieres follarme? Aaja bby mere naal right now. Quiero lamerte toda y luego follarte.",
+        "code": "es",
+        "song": "Perra, soy una vaca. No soy un gato, no digo miau. Perra, soy una vaca."
+    },
+    "Korean 🇰🇷": {
+        "dirty": "Nal wonhae? Na-rang seksu-hago sipeo? Aaja bby mere naal right now. Neo-ui momeul halttgo sip-eo.",
+        "code": "ko",
+        "song": "Nappeun nyeon, naneun so-ya. Naneun goyang-iga aniya, mew-rago haji ana. Nappeun nyeon, naneun so-ya."
+    },
+    "Chinese 🇨🇳": {
+        "dirty": "Nǐ xiǎng yào wǒ ma? Xiǎng gēn wǒ shàngchuáng ma? Aaja bby mere naal right now. Wǒ yào tiǎn nǐ.",
+        "code": "zh-cn",
+        "song": "Biǎozi, wǒ shì yī tiáo niú. Wǒ bùshì māo, wǒ bù huì miāo miāo jiào. Biǎozi, wǒ shì yī tiáo niú."
+    },
+    "Punjabi 🇮🇳": {
+        "dirty": "Aaja bby mere naal right now now now. Teri garm jawani nu nasha pilada. Tenu nange kar ke maza dikhada.",
+        "code": "hi",
+        "song": "Kuttiye, main ik gaan haan. Main billi nahi haan, main mew nahi kehndi. Kuttiye, main ik gaan haan."
+    }
 }
 
 # --- 2-COLUMN GRID ---
@@ -130,29 +152,29 @@ for i in range(0, len(keys), 2):
     with col1:
         lang = keys[i]
         st.write(f"**{lang}**")
-        if st.button(f"Dirty Vocal", key=f"v1_{i}"):
-            st.session_state['msg'] = msg_data[lang][0]
-            play_audio(msg_data[lang][0], msg_data[lang][1])
-        if st.button(f"Mooo! - Doja", key=f"v2_{i}"):
-            st.session_state['msg'] = "🐄 MOOO! Bitch I'm a cow! 🐄"
-            play_audio("", "", is_doja=True)
+        if st.button(f"Dirty Vocal", key=f"d_{i}"):
+            st.session_state['msg'] = msg_data[lang]['dirty']
+            play_audio(msg_data[lang]['dirty'], msg_data[lang]['code'])
+        if st.button(f"Mooo! (Local)", key=f"s_{i}"):
+            st.session_state['msg'] = msg_data[lang]['song']
+            play_audio(msg_data[lang]['song'], msg_data[lang]['code'])
 
     with col2:
         if i + 1 < len(keys):
             lang = keys[i+1]
             st.write(f"**{lang}**")
-            if st.button(f"Dirty Vocal", key=f"v1_{i+1}"):
-                st.session_state['msg'] = msg_data[lang][0]
-                play_audio(msg_data[lang][0], msg_data[lang][1])
-            if st.button(f"Mooo! - Doja", key=f"v2_{i+1}"):
-                st.session_state['msg'] = "🐄 MOOO! Bitch I'm a cow! 🐄"
-                play_audio("", "", is_doja=True)
+            if st.button(f"Dirty Vocal", key=f"d_{i+1}"):
+                st.session_state['msg'] = msg_data[lang]['dirty']
+                play_audio(msg_data[lang]['dirty'], msg_data[lang]['code'])
+            if st.button(f"Mooo! (Local)", key=f"s_{i+1}"):
+                st.session_state['msg'] = msg_data[lang]['song']
+                play_audio(msg_data[lang]['song'], msg_data[lang]['code'])
 
 # --- MESSAGE DISPLAY ---
 if 'msg' in st.session_state:
     st.markdown(f'<div class="message-box">{st.session_state["msg"]}</div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
-if st.button("GET MILKED? 🍼"):
+if st.button("READY TO GET DIRTY? 🍼"):
     st.balloons()
-    st.write("<h3 style='text-align: center; color: white;'>I'm ready for the farm. See you in the barn.</h3>", unsafe_allow_html=True)
+    st.write("<h3 style='text-align: center; color: white;'>Check your DMs... let's go.</h3>", unsafe_allow_html=True)
